@@ -338,7 +338,8 @@ class MxModel(mx.Disposable):
 
         @dataclasses.dataclass
         class Training:
-            dssim_power : float = 1.0
+            dssim_power : float = 0.0
+            mae_power : float = 0.0
             mse_power : float = 1.0
 
             batch_acc : int = 1
@@ -432,23 +433,24 @@ class MxModel(mx.Disposable):
                 if (output_target_image_t := self.get_output_target_image_t()) is not None and \
                    (pred_output_image_t := self.get_pred_output_image_t()) is not None:
 
+                    if (mae_power := job_training.mae_power) != 0.0:
+                        losses.append( torch.mean(mae_power*5*torch.abs(pred_output_image_t-output_target_image_t), (1,2,3)) )
+
                     if (mse_power := job_training.mse_power) != 0.0:
+                        losses.append( torch.mean(mse_power*5*torch.square(pred_output_image_t-output_target_image_t), (1,2,3)) )
 
-                        if isinstance(config, ConfigEnhancer):
-                            losses.append( torch.mean(mse_power*5*torch.abs(pred_output_image_t-output_target_image_t), (1,2,3)) )
+                    if isinstance(config, ConfigEnhancer) and (mae_power != 0.0 or mse_power != 0.0):
 
-                            for logit in (logits := self.gan_forward(pred_output_image_t, net_grad=False)):
-                                losses.append( 0.1*F.binary_cross_entropy_with_logits(logit, torch.ones_like(logit), reduction='none').mean((1,2,3))/len(logits) )
+                        for logit in (logits := self.gan_forward(pred_output_image_t, net_grad=False)):
+                            losses.append( 0.1*F.binary_cross_entropy_with_logits(logit, torch.ones_like(logit), reduction='none').mean((1,2,3))/len(logits) )
 
-                            for logit in (logits := self.gan_forward(output_target_image_t)):
-                                dis_losses.append( F.binary_cross_entropy_with_logits(logit, torch.ones_like(logit), reduction='none').mean((1,2,3))/len(logits) )
+                        for logit in (logits := self.gan_forward(output_target_image_t)):
+                            dis_losses.append( F.binary_cross_entropy_with_logits(logit, torch.ones_like(logit), reduction='none').mean((1,2,3))/len(logits) )
 
-                            for logit in (logits := self.gan_forward(pred_output_image_t.detach())):
-                                dis_losses.append( F.binary_cross_entropy_with_logits(logit, torch.zeros_like(logit), reduction='none').mean((1,2,3))/len(logits) )
+                        for logit in (logits := self.gan_forward(pred_output_image_t.detach())):
+                            dis_losses.append( F.binary_cross_entropy_with_logits(logit, torch.zeros_like(logit), reduction='none').mean((1,2,3))/len(logits) )
 
-                        else:
-                            losses.append( torch.mean(mse_power*10*torch.square(pred_output_image_t-output_target_image_t), (1,2,3)) )
-
+                        
                 if isinstance(config, ConfigXSeg):
 
                     if (output_target_image_u_t := self.get_output_target_image_u_t()) is not None and \

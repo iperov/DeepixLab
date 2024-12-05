@@ -33,6 +33,9 @@ class QxModelTrainer(qx.QVBox):
 
                     .add(qx.QGrid().set_spacing(1)
                         .row(0)
+                            .add(qx.QLabel().set_text('MAE'), align=qx.Align.RightF)
+                            .add(qx.QDoubleSpinBoxMxNumber(trainer.mx_mae_power))
+                        .next_row()
                             .add(qx.QLabel().set_text('MSE'), align=qx.Align.RightF)
                             .add(qx.QDoubleSpinBoxMxNumber(trainer.mx_mse_power))
                         .next_row()

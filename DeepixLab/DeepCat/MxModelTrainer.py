@@ -29,8 +29,9 @@ class MxModelTrainer(mx.Disposable):
         self._mx_batch_size = mx.Number(state.get('batch_size', 16), config=mx.Number.Config(min=1, max=64, step=1)).dispose_with(self)
         self._mx_batch_acc = mx.Number(state.get('batch_acc', 1), config=mx.Number.Config(min=1, max=512, step=1)).dispose_with(self)
         self._mx_learning_rate = mx.Number(state.get('learning_rate', 50), config=mx.Number.Config(min=0, max=250, step=1)).dispose_with(self)
+        self._mx_mae_power = mx.Number(state.get('mae_power', 0.0), config=mx.Number.Config(min=0.0, max=1.0, step=0.1)).dispose_with(self)
         self._mx_mse_power = mx.Number(state.get('mse_power', 1.0), config=mx.Number.Config(min=0.0, max=1.0, step=0.1)).dispose_with(self)
-        self._mx_dssim_power = mx.Number(state.get('dssim_power', 1.0), config=mx.Number.Config(min=0.0, max=1.0, step=0.1)).dispose_with(self)
+        self._mx_dssim_power = mx.Number(state.get('dssim_power', 0.0), config=mx.Number.Config(min=0.0, max=1.0, step=0.1)).dispose_with(self)
 
         self._mx_training = mx.Flag(state.get('training', False)).dispose_with(self)
         self._mx_training.reflect(self._training_task)
@@ -39,6 +40,7 @@ class MxModelTrainer(mx.Disposable):
         return FDict(  {'batch_size'        : self._mx_batch_size.get(),
                         'batch_acc'         : self._mx_batch_acc.get(),
                         'learning_rate'     : self._mx_learning_rate.get(),
+                        'mae_power'         : self._mx_mae_power.get(),
                         'mse_power'         : self._mx_mse_power.get(),
                         'dssim_power'       : self._mx_dssim_power.get(),
                         'metrics_graph_state' : self._mx_metrics_graph.get_state(),
@@ -58,13 +60,14 @@ class MxModelTrainer(mx.Disposable):
     @property
     def mx_learning_rate(self) -> mx.INumber_v: return self._mx_learning_rate
     @property
+    def mx_mae_power(self) -> mx.INumber_v: return self._mx_mae_power
+    @property
     def mx_mse_power(self) -> mx.INumber_v: return self._mx_mse_power
     @property
     def mx_dssim_power(self) -> mx.INumber_v: return self._mx_dssim_power
 
     @property
     def mx_training(self) -> mx.IFlag_v: return self._mx_training
-
 
 
     @ax.task
@@ -97,8 +100,9 @@ class MxModelTrainer(mx.Disposable):
                                                                         output_target_image = data.target_image, ),
 
                                                             training = MxModel.Job.Training(
-                                                                        dssim_power = self._mx_dssim_power.get(),
+                                                                        mae_power = self._mx_mae_power.get(),
                                                                         mse_power = self._mx_mse_power.get(),
+                                                                        dssim_power = self._mx_dssim_power.get(),
 
                                                                         batch_acc = self._mx_batch_acc.get(),
                                                                         lr = self._mx_learning_rate.get() * 1e-6,  ))) )

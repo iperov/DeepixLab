@@ -312,7 +312,7 @@ cmd
         return self._7zip_path / '7za.exe'
 
     def cleanup(self):
-        print ('Cleanup.')
+        print ('Cleanup...')
         subprocess.Popen(args=str(self.clearenv_bat_path), shell=True).wait()
         self.rmdir_in_all_subdirs (self._release_path, '__pycache__')
 

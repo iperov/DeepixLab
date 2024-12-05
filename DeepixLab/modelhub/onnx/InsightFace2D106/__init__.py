@@ -1,0 +1,1 @@
+from .InsightFace2D106 import InsightFace2D106

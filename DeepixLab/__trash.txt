@@ -1,0 +1,5275 @@
+
+# from core import ax
+
+# import numpy as np
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from core.lib.facedesc import FEmbedAlignedFaceInfo
+# import shutil
+# import cv2
+
+# thread_pool = ax.ThreadPool()
+# @ax.task
+# def do_file(head_path : Path, root : Path, root_out : Path, 
+#             ):
+#     yield ax.switch_to(thread_pool)
+    
+#     filename = head_path.name
+    
+    
+#     head_out_path = root_out / 'HEAD' / filename
+    
+#     # head_no_wf_hair_out_path = root_out / 'HEAD_NO_WF_HAIR' / filename
+    
+#     skin_wf_mask_path     = root / 'SKIN_WF_MASK' / filename
+#     skin_wf_mask_out_path = root_out / 'SKIN_WF_MASK' / filename
+#     skin_wf_no_occ_mask_out_path = root_out / 'SKIN_WF_NO_OCC_MASK' / filename
+    
+    
+#     skin_em_mask_path     = root / 'SKIN_EM_MASK' / filename
+#     skin_em_mask_out_path = root_out / 'SKIN_EM_MASK' / filename
+#     skin_em_no_occ_mask_out_path = root_out / 'SKIN_EM_NO_OCC_MASK' / filename
+    
+    
+#     hair_mask_path    = root / 'HAIR_MASK' / filename
+#     hair_mask_out_path = root_out / 'HAIR_MASK' / filename
+    
+#     skin_path     = root / 'SKIN' / filename
+#     skin_out_path = root_out / 'SKIN' / filename
+    
+#     skin_depth_path     = root / 'SKIN_DEPTH' / filename
+#     skin_depth_out_path = root_out / 'SKIN_DEPTH' / filename
+    
+#     skin_wf_depth_out_path = root_out / 'SKIN_WF_DEPTH' / filename
+    
+#     skin_wf_no_occ_depth_out_path = root_out / 'SKIN_WF_NO_OCC_DEPTH' / filename
+    
+#     skin_normal_path     = root / 'SKIN_NORMAL' / filename
+#     skin_normal_out_path = root_out / 'SKIN_NORMAL' / filename
+    
+#     skin_wf_normal_out_path = root_out / 'SKIN_WF_NORMAL' / filename
+#     skin_wf_no_occ_normal_out_path = root_out / 'SKIN_WF_NO_OCC_NORMAL' / filename
+    
+    
+#     occlusion_mask_path     = root / 'OCCLUSION_MASK' / filename 
+
+#     hair_mask_img = FImage.from_file(hair_mask_path)
+#     hair_mask_img_np = hair_mask_img.f32().HWC()
+#     # hair_mask_img_np_sel = (hair_mask_img_np >= 0.5).astype(np.uint8)
+    
+#     # skin_wf_mask_img = FImage.from_file(skin_wf_mask_path)
+#     # skin_wf_mask_img_np = skin_wf_mask_img.f32().HWC()
+#     # skin_wf_mask_img_sel = (skin_wf_mask_img_np >= 0.5).astype(np.uint8)
+
+#     # occlusion_mask_img = FImage.from_file(occlusion_mask_path)
+#     # occlusion_mask_img_np = occlusion_mask_img.f32().HWC()
+#     # occlusion_mask_img_sel = (occlusion_mask_img_np >= 0.5).astype(np.uint8)
+
+#     # hol_per = len(np.argwhere((hair_mask_img_np_sel*skin_wf_mask_img_sel) != 0)) / len(np.argwhere(skin_wf_mask_img_sel != 0))
+#     # occ_per = len(np.argwhere((occlusion_mask_img_sel*skin_wf_mask_img_sel) != 0)) / len(np.argwhere(skin_wf_mask_img_sel != 0))
+#     # if hol_per >= 0.75:
+#     #     print(f'Skipping {filename}. Hair overlap: {hol_per:.2f} ')
+#     #     return
+#     # if occ_per >= 0.75:
+#     #     print(f'Skipping {filename}. Occlusion overlap: {occ_per:.2f} ')
+#     #     return
+#     #head_img_np = FImage.from_file(head_path).f32().HWC()    
+#     #skin_img_np = FImage.from_file(skin_path).f32().HWC()
+#     # head_no_wf_hair_img_np = head_img_np*(1-skin_wf_mask_img_np) + skin_img_np*skin_wf_mask_img_np    
+#     # head_no_wf_hair_img = FImage.from_numpy(head_no_wf_hair_img_np)
+#     # head_no_wf_hair_img.save(head_no_wf_hair_out_path)
+    
+#     skin_depth_np = FImage.from_file(skin_depth_path).f32().HWC()    
+#     skin_normal_np = FImage.from_file(skin_normal_path).f32().HWC()    
+#     skin_wf_mask_np = FImage.from_file(skin_wf_mask_path).f32().HWC()
+#     skin_em_mask_np = FImage.from_file(skin_em_mask_path).f32().HWC()    
+    
+#     occlusion_mask_np = FImage.from_file(occlusion_mask_path).f32().HWC()    
+#     occlusion_unmask_np = (1.0 - occlusion_mask_np)
+    
+    
+    
+#     # WH = max(hair_mask_img_np.shape[0:2])
+#     # size = (int(WH / 64) & ~1) + 1
+    
+#     # kernel = np.ones( (size,size), dtype=np.float32)
+#     # kernel_sum = kernel.sum()
+#     # hair_mask_blur_img_np = cv2.filter2D(hair_mask_img_np, -1, kernel)
+#     # sel = hair_mask_blur_img_np > (kernel_sum * 0.1)
+#     # hair_mask_blur_img_np[sel] = 1.0
+#     # hair_mask_blur_img_np[~sel] = 0.0
+    
+#     # hair_mask_blur_img_np = cv2.GaussianBlur(hair_mask_blur_img_np, (0,0), (WH / 256) )
+    
+    
+#     # #all_occlusion_unmask_np = occlusion_unmask_np * (1-hair_mask_blur_img_np[...,None])
+#     all_occlusion_unmask_np = occlusion_unmask_np * (1-hair_mask_img_np)
+#     # while True:
+#     #     cv2.imshow('', hair_mask_img_np)
+#     #     cv2.waitKey(0)
+#     #     cv2.imshow('', hair_mask_blur_img_np)
+#     #     cv2.waitKey(0)
+#     # import code
+#     # code.interact(local=dict(globals(), **locals()))
+    
+#     head_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     shutil.copy(head_path, head_out_path)
+    
+#     # skin_wf_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # shutil.copy(skin_wf_mask_path, skin_wf_mask_out_path)
+    
+#     skin_wf_no_occ_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     FImage.from_numpy(skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_mask_out_path)
+    
+#     # skin_em_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # shutil.copy(skin_em_mask_path, skin_em_mask_out_path)
+    
+#     skin_em_no_occ_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     FImage.from_numpy(skin_em_mask_np*all_occlusion_unmask_np).save(skin_em_no_occ_mask_out_path)
+    
+    
+#     # skin_wf_depth_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # FImage.from_numpy(skin_depth_np*skin_wf_mask_np).save(skin_wf_depth_out_path)
+    
+#     skin_wf_no_occ_depth_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     FImage.from_numpy(skin_depth_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_depth_out_path)
+    
+    
+#     # skin_wf_normal_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # FImage.from_numpy(skin_normal_np*skin_wf_mask_np).save(skin_wf_normal_out_path)
+    
+#     skin_wf_no_occ_normal_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     FImage.from_numpy(skin_normal_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_normal_out_path)
+    
+     
+    
+    
+#     #shutil.copy(skin_normal_path, skin_normal_out_path)
+    
+#     # shutil.copy(hair_mask_path, hair_mask_out_path)
+#     # shutil.copy(skin_path, skin_out_path)
+#     # shutil.copy(skin_depth_path, skin_depth_out_path)
+#     # 
+#     # 
+#     # 
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+    
+    
+    
+# @ax.task
+# def main_task():    
+#     root = Path(r'E:\Datasets\SSHG_def')
+#     root_out = Path(r'D:\Datasets\SSHG_test')
+    
+#     try:
+#         shutil.rmtree(root_out)
+#     except:
+#         ...    
+        
+#     for value in ax.FutureGenerator( (  ( do_file(filepath, root, root_out), (i,filepath) )
+#                                           for i, filepath in enumerate(lib_path.gen_files_paths(root / 'HEAD')) ),
+#                              max_parallel=16, max_buffer=16):
+#         if value is not None:
+#             fut, (i, filepath) = value
+#             print(i)
+#         else:
+#             yield ax.sleep(0)
+
+# main_task().wait()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# import json
+# from core.lib.image import FImage
+# import cv2
+
+
+# img = FImage.from_file(r'D:\Develop\SSHG\github_project\doc\render_lmrk_example\SKIN\180_6c61aeccaacb4b74837516fd0f8f0353.png')
+# img_np = img.HWC()
+
+# d = json.loads(Path(r'D:\Develop\SSHG\github_project\doc\render_lmrk_example\JSON_DATA\180_6c61aeccaacb4b74837516fd0f8f0353.json').read_text())
+
+# for name, (x,y) in d['landmarks'].items():
+#     for i in range(1, 8):
+#         cv2.circle(img_np, (int(x), int(y)), i, [0,0,0])
+#     cv2.circle(img_np, (int(x), int(y)), 1, [0,255,0])
+
+# cv2.imshow('', img_np)
+# cv2.waitKey(0)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import numpy as np
+# import torch
+
+# g = torch.Generator()
+# g.manual_seed(0)
+
+# #x = torch.ones((1,256), dtype=torch.float32)
+# #m = torch.ones((256,96*96),  dtype=torch.float32)
+# x = torch.rand((1,256), generator=g, dtype=torch.float32)
+# m = torch.rand((256,96*96), generator=g, dtype=torch.float32)
+
+# q = torch.sin(x @ m)/2 + 0.5
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# from core.lib.image import FImage, ImageFormatType
+# # from core.lib.time import timeit
+# from core.lib import path as lib_path
+# import numpy as np
+
+# for filepath in lib_path.get_files_paths(r'F:\blender\SSHGWorkspace\SSHG\test'):
+#     print(filepath)
+#     img = FImage.from_file(filepath)
+    
+#     img_np = img.HWC()
+    
+#     H,W,C = img_np.shape
+    
+#     new_img = FImage.from_numpy(img_np[:H//2, W//2:, :])
+#     new_img.save(filepath)
+    
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+# from core.lib.image import FImage, ImageFormatType
+# from core.lib.time import timeit
+# from core.lib import path as lib_path
+
+# #q = FImage.from_file(Path(r'F:\blender\SSHG\output\HAIR_MASK\\214_affec4347df442959c14ea47f6a2016b.png')).HWC()
+# #w = FImage.from_file(Path(r'F:\blender\SSHG\output\SKIN_WF_MASK\\214_affec4347df442959c14ea47f6a2016b.png')).HWC()
+
+# q = FImage.from_file(Path(r'F:\\blender\\SSHGWorkspace\\output\\SKIN_WF_MASK\\128_fcfe321208c54a9ebe6a1e974fd4f958.png')).HWC()
+# ## = FImage.from_file(Path(r'D:\\test.png')).HWC()
+# #import cv2
+# #q = cv2.imread('D:\\test.png')
+# #print(q[0])
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+# def rnd(st : float):
+#    return np.modf( np.sin(st*12.9898 + st*78.233) * 43758.5453123 )[0]
+
+# for i in range(5):
+#     v = 0.000001 * i
+#     print(f'{v} -> {np.random.uniform()}')
+    
+# import code
+# code.interact(local=dict(globals(), **locals()))
+ 
+# import os
+# import urllib
+# import urllib.request
+# import ssl
+# from core.lib.image import FImage, ImageFormatType
+
+# def download_file(url, savepath : Path):
+#     f = None
+#     while True:
+#         try:
+#             url_request = urllib.request.urlopen(url, context=ssl._create_unverified_context())
+
+#             savepath.parent.mkdir(parents=True, exist_ok=True)
+#             f = open(savepath, 'wb')
+#             while True:
+#                 buffer = url_request.read(8192)
+#                 if not buffer:
+#                     break
+#                 f.write(buffer)
+
+#         except Exception as e:
+#             print(f'Unable to download {url}, {e}')
+#             raise
+#         break
+#     if f is not None:
+#         f.close()
+
+   
+      
+# images = []
+# for x in Path(r'E:\\_images.csv').read_bytes().decode('utf-8').splitlines()[1:]:
+#     try:
+#         image_id,_,url,_,_,_,_,_,size,_,_,_ = x.split(',')
+#         images.append( (image_id, url, size) )
+#     except:
+#         ...
+    
+# images = sorted(images, key=lambda x: x[2], reverse=True)                  
+
+# output_root = Path(r'E:\\output')
+
+# os.system('del /F /S /Q "{}" > nul'.format(str(output_root)))
+# os.system('rmdir /S /Q "{}"'.format(str(output_root)))
+# output_root.mkdir(parents=True, exist_ok=True)
+
+      
+# n = 0
+# for image_id, url, _ in images:
+#     filepath = output_root / f'{n:06}{url[-4:]}'
+#     try:
+#         download_file(url, filepath)          
+        
+#         img = FImage.from_file(filepath)
+#         filepath.unlink()
+#         img = img.resize(1024, 1024, interp=FImage.Interp.LANCZOS4)
+#         img.save(filepath, ImageFormatType.JPEG2000)
+        
+#         print(f'Success {url}')  
+#         n += 1
+#     except:
+#         print(f'Failed {url}')
+        
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+   
+      
+# class_name_by_id = {x.split(',')[0] : x.split(',')[1] for x in Path(r'E:\\_classes.csv').read_text().splitlines() }
+
+# image_labels_dict = {}
+# for x in Path(r'E:\\_image_labels.csv').read_text().splitlines()[1:]:
+#     image_id, _, label_name, confidence = x.split(',') 
+#     if float(confidence) != 1.0:
+#         continue
+#     if (ar := image_labels_dict.get(image_id, None)) is None:
+#         ar = image_labels_dict[image_id] = []
+#     ar.append(label_name)
+    
+# images = []
+# for x in Path(r'E:\\_images.csv').read_bytes().decode('utf-8').splitlines()[1:]:
+#     try:
+#         image_id,_,url,_,_,_,_,_,size,_,_,_ = x.split(',')
+#         images.append( (image_id, url, size) )
+#     except:
+#         ...
+    
+# images = sorted(images, key=lambda x: x[2], reverse=True)
+                  
+
+# output_root = Path(r'E:\\output')
+
+# os.system('del /F /S /Q "{}" > nul'.format(str(output_root)))
+# os.system('rmdir /S /Q "{}"'.format(str(output_root)))
+# output_root.mkdir(parents=True, exist_ok=True)
+# n = 0
+# for image_id, url, _ in images:
+#     if (image_labels := image_labels_dict.get(image_id, None)) is not None:
+        
+#         ok_image = True
+#         for label in image_labels:
+#             if (class_name := class_name_by_id.get(label, None)) is None or \
+#                'man' in class_name.lower():
+#                 ok_image = False
+#                 break
+
+#         if ok_image:
+#             try:
+#                 download_file(url, output_root / f'{n:06}{url[-4:]}')          
+#                 print(f'Success {url}')  
+#                 n += 1
+#             except:
+#                 print(f'Failed {url}')
+# import code
+# code.interact(local=dict(globals(), **locals()))
+      
+      
+      
+      
+      
+# from core.lib.image import FImage, ImageFormatType
+# from core.lib.time import timeit
+# from core.lib import path as lib_path
+
+# for filepath in lib_path.get_files_paths(Path(r'D:\blender\RHG\Skin_mat')):
+#     print(filepath)
+#     img = FImage.from_file(filepath)
+#     img.save(filepath, ImageFormatType.JPEG2000)
+#     filepath.unlink()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# from core import ax
+
+# import numpy as np
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from core.lib.facedesc import FEmbedAlignedFaceInfo
+# import shutil
+# import cv2
+
+# thread_pool = ax.ThreadPool()
+# @ax.task
+# def do_file(file_path : Path, root_depth : Path, root_depth_out : Path,
+#                                root_mask : Path, root_mask_out : Path, 
+#             ):
+#     yield ax.switch_to(thread_pool)
+
+#     depth_path = root_depth / (file_path.stem[:-3] + '.png')
+#     mask_path = root_mask / (file_path.stem[:-3] + '.png')
+    
+#     #img = FImage.from_file(file_path)
+#     depth = FImage.from_file(depth_path)
+#     depth = depth.invert().resize(512,512, interp=FImage.Interp.LANCZOS4)
+    
+#     # mask = FImage.from_file(mask_path)
+#     # mask_np = mask.HWC()
+#     # import code
+#     # code.interact(local=dict(globals(), **locals()))
+#     # mask_np[ mask_np==[255,255,255] ] = [0,0,0]
+#     # mask_np[ mask_np==[255,255,255] ] = [0,0,0]
+#     # mask_np = (mask_np == 13).astype(np.float32)
+#     # mask_np = ((mask_np!=10) & (mask_np !=0)).astype(np.float32)
+#     # mask_np = (mask_np >= 2).astype(np.float32)
+#     # cv2.imshow('', mask.HWC())
+#     # cv2.waitKey(0)
+    
+#     # if len( np.argwhere( (mask_np == 6)  ) ) != 0:
+#     #     # skip with glasses 
+#     #     return
+    
+#     # #mask_np = ((mask_np>=1)&(mask_np<=11)).astype(np.float32)
+#     # mask_np = (mask_np == [1,2,3,4,5,10,11,12,13] ).max(-1, keepdims=True).astype(np.float32)
+
+#     meta = FEmbedAlignedFaceInfo.from_embed(file_path)
+    
+#     depth = depth.warp_affine(meta.aligned_face.mat, meta.aligned_face.image_size, )
+#     depth.save( root_depth_out / (file_path.stem + '.png') )
+    
+#     #shutil.copy(file_path, root_out / (file_name + file_path.suffix))
+    
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+
+# @ax.task
+# def main_task():
+    
+#     root = Path(r'F:\SynthForgeData\train\images_faces')
+#     root_depth = Path(r'F:\SynthForgeData\train\depth')   
+#     root_depth_out = root / 'depth'
+#     root_mask = Path(r'F:\SynthForgeData\train\seg')   
+#     root_mask_out = root / 'mask'
+
+#     try:
+#         shutil.rmtree(root_depth_out)
+#         shutil.rmtree(root_mask_out)
+#     except:
+#         ...
+#     root_depth_out.mkdir(exist_ok=True, parents=True)
+#     root_mask_out.mkdir(exist_ok=True, parents=True)
+
+#     for value in ax.FutureGenerator( (  ( do_file(file_path, root_depth, root_depth_out, root_mask, root_mask_out), (i,file_path) )
+#                                           for i, file_path in enumerate(lib_path.gen_files_paths(root)) ),
+#                              max_parallel=16, max_buffer=16):
+#         if value is not None:
+#             fut, (i, file_path) = value
+#             print(i)
+#         else:
+#             yield ax.sleep(0)
+
+# main_task().wait()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# from core import ax
+
+# import numpy as np
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from core.lib.facedesc import FEmbedAlignedFaceInfo
+# import shutil
+    
+# thread_pool = ax.ThreadPool()
+# @ax.task
+# def do_file(file_path : Path, root_mask : Path, root_mask_out):
+#     yield ax.switch_to(thread_pool)
+
+#     mask_path = root_mask / (file_path.stem[:-3] + '.png')
+    
+#     #img = FImage.from_file(file_path)
+#     mask = FImage.from_file(mask_path)
+    
+    
+#     # if len( np.argwhere( (mask_np == 6)  ) ) != 0:
+#     #     # skip with glasses 
+#     #     return
+    
+#     # #mask_np = ((mask_np>=1)&(mask_np<=11)).astype(np.float32)
+#     # mask_np = (mask_np == [1,2,3,4,5,10,11,12,13] ).max(-1, keepdims=True).astype(np.float32)
+#     mask_np = mask.HWC()
+#     #mask_np = (mask_np == 13).astype(np.float32)
+#     #mask_np = ((mask_np!=10) & (mask_np !=0)).astype(np.float32)
+#     mask_np = (mask_np >= 2).astype(np.float32)
+
+#     meta = FEmbedAlignedFaceInfo.from_embed(file_path)
+    
+#     mask = FImage(mask_np).warp_affine(meta.aligned_face.mat, meta.aligned_face.image_size, )
+#     mask.save( root_mask_out / (file_path.stem + '.png') )
+    
+#     #shutil.copy(file_path, root_out / (file_name + file_path.suffix))
+    
+# @ax.task
+# def main_task():
+    
+#     # root = Path(r'E:\Datasets\FaceSynthetics')
+#     # root_mask = Path(r'E:\facesyntetics_100000\seg')
+#     # root = Path(r'E:\sfhq1\images\images_faces')
+#     # root_mask = Path(r'E:\sfhq1\segmentations\segmentations')
+#     # root = Path(r'E:\Datasets\LapaMask')
+#     # root_mask = Path(r'E:\Datasets\DFLFacesets\LaPa\all\labels')   
+#     root = Path(r'E:\Datasets\EasyPortrait_faces')
+#     root_mask = Path(r'E:\EasyPortrain_annotations\annotations\train')   
+      
+    
+    
+#     #root_out = root.parent / (root.name+'_out')
+#     root_mask_out = root / 'mask'
+
+#     try:
+#         #shutil.rmtree(root_out)
+#         shutil.rmtree(root_mask_out)
+#     except:
+#         ...
+#     #root_out.mkdir(exist_ok=True, parents=True)
+#     root_mask_out.mkdir(exist_ok=True, parents=True)
+
+#     for value in ax.FutureGenerator( (  ( do_file(file_path, root_mask, root_mask_out), (i,file_path) )
+#                                           for i, file_path in enumerate(lib_path.gen_files_paths(root)) ),
+#                              max_parallel=16, max_buffer=16):
+#         if value is not None:
+#             fut, (i, file_path) = value
+#             print(i)
+#         else:
+#             yield ax.sleep(0)
+
+# main_task().wait()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# import numpy as np
+# import cv2
+# from core.lib.image import FImage, ImageFormatType
+# from core.lib.time import timeit
+# from core.lib.image import gen as lib_gen
+# from core.lib.image import aug as lib_aug
+
+
+# # img = lib_gen.test_gen(256,256)
+
+# # cv2.imshow('', img.HWC())
+# # cv2.waitKey(0)
+
+# img = FImage.ones(256,256,3).u8()
+# img = FImage.from_file(Path(r'D:\\Develop\\test\\00000.jpg')).resize(256,256).f32()
+
+# img = img.ch1()
+
+# W=H=256
+# import numpy.random as nprnd
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+#             if img.shape[-1] == 3:
+#                 x = FImage.from_b_g_r(  lib_aug.Geo().transform(img.ch1_from_b(), deform_intensity=1.0),        
+#                                         lib_aug.Geo().transform(img.ch1_from_g(), deform_intensity=1.0),
+#                                         lib_aug.Geo().transform(img.ch1_from_r(), deform_intensity=1.0) )
+#             else:
+#                 x = lib_aug.Geo().transform(img.ch1(), deform_intensity=1.0)
+                                    
+#             x = img.blend(x, FImage.ones_f32_like(img), alpha=0.25)
+
+#             #x = img#.channel_exposure([-1.1,-1.1,-1.1])
+#             #x = lib_gen.bezier(256,256, 0,0, 255,0, 255,255, 50)
+            
+#             #x = lib_aug.binary_stripes(W, H).gaussian_blur( nprnd.uniform(8, 32) ).satushift()
+#             #x = img.satushift()
+#             #x = img.apply(lambda x: x - x.min()).apply(lambda x: x / x.max())
+#             #x = lib_gen.icon_loading(256, 1, 10.0, 0.1, [0],[1], 1.0)
+#             #x = lib_aug.cut_edges_mask(256, 256)
+#             #x = lib_aug.hsv_shift(img)
+#             #x = lib_aug.levels(img)
+#             #x = img.levels([0],[1],[1],[0],[1])
+#             #x = img.blend(img, img)
+#             cv2.imshow('', x.HWC())
+#             cv2.waitKey(0)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import cv2
+# # from core.lib.image.gen import test_gen
+# # from core.lib.image.gen._gen import setup_compile
+# # setup_compile()
+# from core.lib.image.aug import noise_clouds
+# from core.lib.image.gen import clouds, binary_clouds, binary_stripes
+
+# while True:
+#     img = binary_stripes(256, 256)
+#     cv2.imshow('', img.HWC())
+#     cv2.waitKey(0)
+
+# import numpy as np
+# x = np.load(r'E:\Torrents\VGGHeads\VGGHead\large\split_00043\annotations\laion_000e99a82256461591e824f68a78bd5b.npz')
+
+
+
+# m = LoRAE(8) 
+# m.train()
+
+# import torch
+# import torch.amp
+# import torch.autograd
+# import torch.linalg
+# import torch.nn as nn
+# import torch.nn.functional as F
+
+# x = torch.ones( (1,3,8,8), dtype=torch.float32 )
+
+# w = torch.tensor([[[[0.1140]],[[0.5870]],[[0.2990]]]], dtype=torch.float32)
+# (x*w).sum(1, keepdims=True)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# x = torch.rand( (8,8), dtype=torch.float32, requires_grad=True)
+
+# while True:
+#     l = torch.linalg.norm(x, ord='nuc')
+#     l.backward()
+#     print(x, l)
+
+#     x = (x - x.grad*0.001).clone().detach().requires_grad_(True)
+    
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from core.lib.random import Choicer
+
+# def hash64(x : int) -> int:
+#     x = np.uint64(x)
+#     x ^= x >> np.uint64(32)
+#     x *= np.uint64(0xd6e8feb86659fd93)
+#     x ^= x >> np.uint64(32)
+#     x *= np.uint64(0xd6e8feb86659fd93)
+#     x ^= x >> np.uint64(32)
+#     return int(x )
+
+# def hashf64(x : int) -> float:
+#     x = np.uint64(x)
+#     x ^= x >> np.uint64(32)
+#     x *= np.uint64(0xd6e8feb86659fd93)
+#     x ^= x >> np.uint64(32)
+#     x *= np.uint64(0xd6e8feb86659fd93)
+#     x ^= x >> np.uint64(32)
+#     return int(x )
+
+# import itertools
+
+# # m = 99999999999999
+# # for i in itertools.count(1,1):
+# #     x = hash64(i+100000)# / 0xFFFFFFFFFFFFFFFF
+# #     if x < m:
+# #         m = x
+# #         print(m)
+      
+# c = Choicer(['a', 
+#              'b', 
+#              Choicer(['c0','c1','c2'], [1,1,1]),
+#              ],            
+#              [1,1,0.5])
+
+# print( c.pick(15) )
+# # ['b', 'a', 'b', 'c0', 'a', 'b', 'a', 'b', 'c1', 'a', 'b', 'c2', 'a', 'a', 'b']
+
+# import os
+# os.environ['MKL_NUM_THREADS'] = '1'
+# os.environ['NUMEXPR_NUM_THREADS'] = '1'
+# os.environ['OMP_NUM_THREADS'] = '1'
+
+
+
+
+# img = FImage.from_numpy(np.random.rand(1024,1024,3).astype(np.float32)).u8()
+
+# path = img.save(Path(r'D:\\test.unk'), ImageFormatType.PNG)
+
+
+# import os
+# os.environ['MKL_NUM_THREADS'] = '1'
+# os.environ['NUMEXPR_NUM_THREADS'] = '1'
+# os.environ['OMP_NUM_THREADS'] = '1'
+
+# import cv2
+# cv2.setNumThreads(1)
+
+
+# import numpy as np
+
+# import time
+# from core.lib.image import FImage, TImage
+# from core.lib.math import FAffMat2
+# from core.lib.time import timeit
+# from core.lib.image import aug as lib_aug
+# from core.lib.image import gen as lib_gen
+
+
+# from core.lib.image.aug.Geo import gen_grid
+
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+# IH = IW = 8*64
+# OH = OW = 8*64
+# C = 3
+# img = checkerboard( (IH,IW)).astype(np.float32).reshape(IH,IW,1)
+# img = np.tile(img, (1,1,C))
+
+# #img = (img *255).astype(np.uint8)
+
+# mat = FAffMat2().scale(4).translate(50,50).rotate_deg(15)
+# mat = FAffMat2()
+
+# grid = np.stack(np.meshgrid(np.linspace( 0, IW-1, OW, dtype=np.float32), 
+#                             np.linspace( 0, IH-1, OH, dtype=np.float32) ), -1)
+# grid += 4
+# #W = H = 256
+
+# test = np.ones( (256,256,3), np.float32)
+
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+            
+#             #img_out = lib_gen.noise(256,256).HWC()
+#             x = lib_gen.clouds(256,256)
+            
+#             #gen_grid(256,256, 8, 1, 0)
+#             #FImage.from_file(Path(r'E:\0001917.png'))
+            
+#             ##img_out = np.empty( (H,W,1), dtype=np.float32 )
+#             #c_circle_faded(img_out.ctypes.data, W, H, 128,128, 0, 128)
+
+#             #img_out = circle_faded(W,H, 128, 128, 0, 128).HWC()
+            
+#             # img_out = np.empty( (OH,OW,C), np.float32 )
+#             # img = np.ascontiguousarray(img)
+#             # grid = np.ascontiguousarray(grid)
+#             # c_remap(img_out.ctypes.data, img.ctypes.data, grid.ctypes.data, IH,IW,C,OH,OW) 
+            
+#             # interp=FImage.Interp.LANCZOS4
+#             # interp=FImage.Interp.LINEAR
+#             # interp=FImage.Interp.CUBIC
+            
+#             # border=FImage.Border.REPLICATE
+#             # border=FImage.Border.CONSTANT
+             
+#             #img_out = FImage.from_numpy(img).remap(grid, interp=interp, border=border).HWC()#, 
+#             #img_out = FImage.from_numpy(img).warp_affine(mat, OW,OH, interp=interp, border=border).HWC()#, 
+            
+#             #img_out.blend(img_out, img_out)
+#             # img_out = cv2.remap(img, grid, None, interpolation=cv2.INTER_LINEAR)
+            
+#             #cv2.imshow('', img_out)
+#             #cv2.waitKey(0)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+   
+# import numpy as np
+# import time
+# import cv2
+# from core.lib.image import FImage
+# from core.lib.math import FAffMat2
+# from core.lib.time import timeit
+# from core.lib.image import aug as lib_aug
+
+# from core.lib import avecl as cl
+# from core.lib.avecl._test import run_test
+# from core.lib.torch.functional.gaussian import get_gaussian_kernel
+
+# import jax
+# import jax.numpy as jnp
+   
+# cv2.setNumThreads(8)
+
+# def np_remap(X, grid ):
+#     H,W,C = X.shape
+#     x = grid[...,0]
+#     y = grid[...,1]
+#     OH,OW = grid.shape[:2]
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+
+
+#     x0 = x.astype(np.int32)
+#     x1 = x0 + 1
+#     y0 = y.astype(np.int32)
+#     y1 = y0 + 1
+
+#     ind_x0 = np.clip(x0,0,W-1)
+#     ind_x1 = np.clip(x1,0,W-1)
+#     ind_y0 = np.clip(y0,0,H-1)
+#     ind_y1 = np.clip(y1,0,H-1)
+
+#     indices_a = ind_y0 * W + ind_x0
+#     indices_b = ind_y1 * W + ind_x0
+#     indices_c = ind_y0 * W + ind_x1
+#     indices_d = ind_y1 * W + ind_x1
+
+#     flat_image = np.reshape(X, (-1, C) )
+
+#     pixel_values_a = np.reshape( flat_image[np.ndarray.flatten (indices_a)], (OH,OW,C) )
+#     pixel_values_b = np.reshape( flat_image[np.ndarray.flatten (indices_b)], (OH,OW,C) )
+#     pixel_values_c = np.reshape( flat_image[np.ndarray.flatten (indices_c)], (OH,OW,C) )
+#     pixel_values_d = np.reshape( flat_image[np.ndarray.flatten (indices_d)], (OH,OW,C) )
+
+#     x0 = x0.astype(x.dtype)
+#     x1 = x1.astype(x.dtype)
+#     y0 = y0.astype(y.dtype)
+#     y1 = y1.astype(y.dtype)
+
+#     area_a = (x1 - x) * (y1 - y)
+#     area_b = (x1 - x) * (y - y0)
+#     area_c = (x - x0) * (y1 - y)
+#     area_d = (x - x0) * (y - y0)
+
+#     values_a = area_a[...,None] * pixel_values_a
+#     values_b = area_b[...,None] * pixel_values_b
+#     values_c = area_c[...,None] * pixel_values_c
+#     values_d = area_d[...,None] * pixel_values_d
+
+#     interpolated_image = values_a + values_b + values_c + values_d
+#     return interpolated_image
+
+
+# def jnp_remap(img, grid ):
+#     H,W,C = img.shape
+#     x = grid[...,0]
+#     y = grid[...,1]
+#     OH,OW = grid.shape[:2]
+    
+#     x0 = x.astype(jnp.int32)
+#     x1 = x0 + 1
+#     y0 = y.astype(jnp.int32)
+#     y1 = y0 + 1
+
+#     ind_x0 = jnp.clip(x0,0,W-1)
+#     ind_x1 = jnp.clip(x1,0,W-1)
+#     ind_y0 = jnp.clip(y0,0,H-1)
+#     ind_y1 = jnp.clip(y1,0,H-1)
+
+#     indices_a = ind_y0 * W + ind_x0
+#     indices_b = ind_y1 * W + ind_x0
+#     indices_c = ind_y0 * W + ind_x1
+#     indices_d = ind_y1 * W + ind_x1
+
+#     flat_image = jnp.reshape(img, (-1, C) )
+    
+   
+#     pixel_values_a = jnp.reshape( flat_image[indices_a.flatten()], (OH,OW,C) )
+#     pixel_values_b = jnp.reshape( flat_image[indices_b.flatten()], (OH,OW,C) )
+#     pixel_values_c = jnp.reshape( flat_image[indices_c.flatten()], (OH,OW,C) )
+#     pixel_values_d = jnp.reshape( flat_image[indices_d.flatten()], (OH,OW,C) )
+
+#     x0 = x0.astype(x.dtype)
+#     x1 = x1.astype(x.dtype)
+#     y0 = y0.astype(y.dtype)
+#     y1 = y1.astype(y.dtype)
+    
+#     x1mx = x1-x
+#     y1my = y1-y
+#     xmx0 = x-x0
+#     ymy0 = y-y0
+    
+#     area_a = x1mx * y1my
+#     area_b = x1mx * ymy0
+#     area_c = xmx0 * y1my
+#     area_d = xmx0 * ymy0
+
+#     values_a = area_a[...,None] * pixel_values_a
+#     values_b = area_b[...,None] * pixel_values_b
+#     values_c = area_c[...,None] * pixel_values_c
+#     values_d = area_d[...,None] * pixel_values_d
+
+#     return values_a + values_b + values_c + values_d
+
+
+# def np_warp_affine(X : np.ndarray, mat : np.ndarray, OH, OW):
+#     H,W,C = X.shape
+       
+#     coords = np.stack(np.meshgrid(np.arange(OW, dtype=np.float32),
+#                                   np.arange(OH, dtype=np.float32), copy=False ), -1)
+#     coords = np.concatenate([ coords, np.ones( (OH,OW,1), np.float32 )], -1)
+#     mat = np.linalg.inv( np.concatenate([ mat, np.array([ [0,0,1]], mat.dtype) ], 0) )[:2]
+    
+#     coords = coords @ mat.T
+    
+#     x = coords[...,0]
+#     y = coords[...,1]
+    
+
+#     x0 = x.astype(np.int32)
+#     x1 = x0 + 1
+#     y0 = y.astype(np.int32)
+#     y1 = y0 + 1
+
+#     ind_x0 = np.clip(x0,0,W-1)
+#     ind_x1 = np.clip(x1,0,W-1)
+#     ind_y0 = np.clip(y0,0,H-1)
+#     ind_y1 = np.clip(y1,0,H-1)
+
+#     indices_a = ind_y0 * W + ind_x0
+#     indices_b = ind_y1 * W + ind_x0
+#     indices_c = ind_y0 * W + ind_x1
+#     indices_d = ind_y1 * W + ind_x1
+
+#     flat_image = np.reshape(X, (-1, C) )
+
+#     pixel_values_a = np.reshape( flat_image[np.ndarray.flatten (indices_a)], (OH,OW,C) )
+#     pixel_values_b = np.reshape( flat_image[np.ndarray.flatten (indices_b)], (OH,OW,C) )
+#     pixel_values_c = np.reshape( flat_image[np.ndarray.flatten (indices_c)], (OH,OW,C) )
+#     pixel_values_d = np.reshape( flat_image[np.ndarray.flatten (indices_d)], (OH,OW,C) )
+
+#     x0 = x0.astype(x.dtype)
+#     x1 = x1.astype(x.dtype)
+#     y0 = y0.astype(y.dtype)
+#     y1 = y1.astype(y.dtype)
+
+#     area_a = (x1 - x) * (y1 - y)
+#     area_b = (x1 - x) * (y - y0)
+#     area_c = (x - x0) * (y1 - y)
+#     area_d = (x - x0) * (y - y0)
+
+#     values_a = area_a[...,None] * pixel_values_a
+#     values_b = area_b[...,None] * pixel_values_b
+#     values_c = area_c[...,None] * pixel_values_c
+#     values_d = area_d[...,None] * pixel_values_d
+
+#     interpolated_image = values_a + values_b + values_c + values_d
+
+#     return interpolated_image
+
+
+# def jnp_warp_affine(X : np.ndarray, mat : np.ndarray, OH : int, OW : int):
+#     H,W,C = X.shape
+    
+#     coords = jnp.stack(jnp.meshgrid(jnp.arange(OW, dtype=jnp.float32),
+#                                     jnp.arange(OH, dtype=jnp.float32) ), -1)
+    
+#     coords = jnp.concatenate([ coords, jnp.ones( (OH,OW,1), jnp.float32 )], -1)
+#     mat = jnp.linalg.inv( jnp.concatenate([ mat, jnp.array([ [0,0,1]], mat.dtype) ], 0) )[:2]
+    
+#     coords = coords @ mat.T
+    
+#     x = coords[...,0]
+#     y = coords[...,1]
+    
+
+#     x0 = x.astype(jnp.int32)
+#     x1 = x0 + 1
+#     y0 = y.astype(jnp.int32)
+#     y1 = y0 + 1
+
+#     ind_x0 = jnp.clip(x0,0,W-1)
+#     ind_x1 = jnp.clip(x1,0,W-1)
+#     ind_y0 = jnp.clip(y0,0,H-1)
+#     ind_y1 = jnp.clip(y1,0,H-1)
+
+#     indices_a = ind_y0 * W + ind_x0
+#     indices_b = ind_y1 * W + ind_x0
+#     indices_c = ind_y0 * W + ind_x1
+#     indices_d = ind_y1 * W + ind_x1
+
+#     flat_image = jnp.reshape(X, (-1, C) )
+
+#     pixel_values_a = jnp.reshape( flat_image[indices_a.flatten()], (OH,OW,C) )
+#     pixel_values_b = jnp.reshape( flat_image[indices_b.flatten()], (OH,OW,C) )
+#     pixel_values_c = jnp.reshape( flat_image[indices_c.flatten()], (OH,OW,C) )
+#     pixel_values_d = jnp.reshape( flat_image[indices_d.flatten()], (OH,OW,C) )
+
+#     x0 = x0.astype(x.dtype)
+#     x1 = x1.astype(x.dtype)
+#     y0 = y0.astype(y.dtype)
+#     y1 = y1.astype(y.dtype)
+
+#     area_a = (x1 - x) * (y1 - y)
+#     area_b = (x1 - x) * (y - y0)
+#     area_c = (x - x0) * (y1 - y)
+#     area_d = (x - x0) * (y - y0)
+
+#     values_a = area_a[...,None] * pixel_values_a
+#     values_b = area_b[...,None] * pixel_values_b
+#     values_c = area_c[...,None] * pixel_values_c
+#     values_d = area_d[...,None] * pixel_values_d
+
+#     return values_a + values_b + values_c + values_d
+
+# jnp_remap_jit = jax.jit(jnp_remap)
+# jnp_warp_affine_jit = jax.jit(jnp_warp_affine, static_argnames=['OH','OW'])
+
+# #img_t = torch.tensor(img).permute(2,0,1)[None,...].cuda()
+# #grid_t = torch.tensor(grid)[None,...]#.cuda()
+
+
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+# IH = IW = 8
+# OH = OW = 8*32
+# C = 3
+
+# img_np = checkerboard( (IH,IW)).astype(np.float32).reshape(IH,IW,1) 
+# img_np = np.tile(img_np, (1,1,C))
+
+# #img = FImage( )
+
+
+# while True:
+#     mat = np.float32([ [3,0,30], [0,3,30]])
+#     with timeit():
+#         for _ in range(1000):
+#             x = jnp_warp_affine_jit(img_np, mat, OH,OW).__array__()
+            
+#             #cv2.warpAffine(img_np, mat, (OH,OW), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+            
+#             ##img_out = np.empty( (H,W,1), dtype=np.float32 )
+#             #c_circle_faded(img_out.ctypes.data, W, H, 128,128, 0, 128)
+
+#             #img_out = circle_faded(W,H, 128, 128, 0, 128).HWC()
+            
+#             # img_out = np.empty( (OH,OW,C), np.float32 )
+#             # img = np.ascontiguousarray(img)
+#             # grid = np.ascontiguousarray(grid)
+#             # c_remap(img_out.ctypes.data, img.ctypes.data, grid.ctypes.data, IH,IW,C,OH,OW) 
+            
+#             #x_t = F.grid_sample(img_t, grid_t, mode='bilinear', padding_mode='zeros', align_corners=False)
+            
+#             #x = blend(img_t, img_t, img_t)
+            
+#             #
+#             #img_out = FImage(img).remap(grid).HWC() # .580
+            
+#             #img_out = jnp_remap_jit(img, grid).__array__() # .290
+            
+   
+#             #import code
+#             #code.interact(local=dict(globals(), **locals()))
+   
+#             #img_out.blend(img_out, img_out)
+#             # img_out = cv2.remap(img, grid, None, interpolation=cv2.INTER_LINEAR)
+            
+#             #cv2.imshow('', x)
+#             #cv2.waitKey(0)
+
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import random
+
+
+# #run_test()
+# K_np = get_gaussian_kernel(1, max(3, int(2 * 2 *2)), 2)
+
+# device = cl.get_best_device()
+
+# while True:
+#     W = random.randint(128,256)
+#     H = random.randint(128,256)
+#     W = 1024
+#     H = 1024
+#     I_np = np.ones( (1,1,H,W), np.float32)
+#     K_np = np.ones( (3,5,5), np.float32)
+    
+#     I_t = cl.Array.from_numpy(I_np, context=device)
+#     K_t = cl.Array.from_numpy(K_np, context=device)
+
+#     a = []
+#     with timeit():
+#         with timeit('sub'):
+#             for _ in range(100):
+#                 x = cl.depthwise_conv2D(I_t, K_t)
+#                 a.append(x)
+        
+#         device.finish()
+#     time.sleep(0.1)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import torch
+# import torch.nn.functional as F
+# from core.lib.time import timeit
+
+# I = torch.ones( (1,16,512,512), dtype=torch.float32, device='cuda')
+
+# K_np = np.ones( (16,1,9,9), dtype=np.float32 )
+# while True:
+#     outs = []
+#     with timeit('all'):
+#         with timeit('commands'):
+#             for _ in range(128):
+#                 #K = torch.ones( (16,1,9,9), dtype=torch.float32, device='cuda')
+#                 K = torch.tensor(K_np).to('cuda', non_blocking=True)
+#                 O = F.conv2d(I, K, groups=16)
+#                 outs.append(O)
+            
+#         torch.cuda.synchronize()
+            
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# import time
+# from core.lib.image import FImage, TImage
+# from core.lib.math import FAffMat2
+# from core.lib.time import timeit
+
+# import torch
+# import torch.nn.functional as F
+
+# from core.lib import torch as lib_torch
+# from core.lib.torch import random as xrandom
+
+# device = lib_torch.get_best_device(lib_torch.get_avail_gpu_devices()+[lib_torch.get_cpu_device()])
+
+   
+# mat = FAffMat2().scale(2).translate(50,50)
+
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+# IH = IW = 8
+# OH = OW = 8*64
+# C = 1
+
+# img = (checkerboard( (IH,IW))*255).astype(np.uint8).reshape(IH,IW,C)
+
+# grid = np.stack(np.meshgrid(np.linspace( 0, IW-1, OW, dtype=np.float32), 
+#                              np.linspace( 0, IH-1, OH, dtype=np.float32) ), -1)
+
+# grid_t = torch.tensor(grid, device=device.device)
+
+# #img = FImage.from_numpy(img)
+# img = FImage.from_file(Path(r'D:\\Develop\\test\\00000.jpg')).resize(256,256)
+# #img2 = FImage.from_file(Path(r'D:\\Develop\\test\\00001.jpg'))
+
+# img_t = img.to(device)
+# #img2_t = img2.to(device).resize(img_t.width, img_t.height)
+
+# mask_t = TImage.ones_like(img_t)
+
+    
+
+# while True:
+#     #W = random.randint(128,256)
+#     #H = random.randint(128,256)
+#     #img_t = TImage.ones(1,H,W, device=device)
+#     # with timeit():
+#     #     with timeit('sub'):
+#     #         for _ in range(100):
+#     #             
+#     #             # x=xrandom.uniform((512,512), 0xFFFFFFFF, device=device.device)
+#     #             #import code
+#     #             #code.interact(local=dict(globals(), **locals()))
+                
+                
+#     #             # trandom( (512,512), 0, device=device.device)
+#     #             img_t.gaussian_blur(2.0)
+#     #             #torch.rand((512,512), dtype=torch.float32, device=device.device)
+#     #             #x = img_t.levels ( (0.4,), (1,),(1,), (0,), (1,))
+#     #             #x = img_t.hsv_shift(-0.1, -0.3, 0.4)
+#     #     torch.cuda.synchronize()
+#     # # continue
+            
+#     # #x = img_t.gaussian_sharpen(2, 5)
+#     # #x = img_t.blend(img2_t, mask_t, alpha=0.5)
+#     # #x = img_t.levels ( (0.4,), (1,),(1,), (0,), (1,))
+#     # #x = img_t.hsv_shift(-0.1, -0.3, 0.4)
+    
+#     tgeo = lib_taug.Geo( lib_taug.TransformParams(-0.1))
+
+#     x = tgeo.transform(img_t,  deform_intensity=0.75, border=TImage.Border.REFLECT)
+    
+#     #x = img_t.remap(grid_t)
+#     cv2.imshow('',x.cpu().HWC())
+#     cv2.waitKey(0)
+                
+#     # x = img.warp_affine(mat, 256,256)
+#     # cv2.imshow('',x.HWC())
+#     # cv2.waitKey(0)
+    
+#     # #img_t = img_t.remap(grid_t)
+#     # x = img_t.warp_affine(mat, 256, 256)
+
+#     # cv2.imshow('', x.cpu().HWC())
+#     # cv2.waitKey(0)
+      
+# import code
+# code.interact(local=dict(globals(), **locals()))
+   
+   
+   
+   
+   
+
+   
+   
+   
+   
+# geo = lib_aug.Geo()
+
+
+# OW=OH=TW=TH=256
+# deform_cell_count= 4
+
+# while True:
+#     img = lib_aug.noise_clouds(256,256).ch(3)
+    
+#     seed= 0
+    
+#     in_b_range=[0.0, 0.33]
+#     in_w_range=[0.66, 1.0]
+#     in_g_range=[0.5, 2.0]
+#     out_b_range=[0.0, 0.33]
+#     out_w_range=[0.66, 1.0]
+#     C = 3
+    
+#     with timeit():
+#         rnd_state = np.random.RandomState(seed)
+#         in_b = np.float32([ rnd_state.uniform(in_b_range[0], in_b_range[1]) for _ in range(C) ])
+#         in_w = np.float32([ rnd_state.uniform(in_w_range[0], in_w_range[1]) for _ in range(C) ])
+#         in_g = np.float32([ rnd_state.uniform(in_g_range[0], in_g_range[1]) for _ in range(C) ])
+        
+#         out_b = np.float32([ rnd_state.uniform(out_b_range[0], out_b_range[1]) for _ in range(C) ])
+#         out_w = np.float32([ rnd_state.uniform(out_w_range[0], out_w_range[1]) for _ in range(C) ])
+        
+#         for _ in range(100):   
+#             # w = np.stack(np.meshgrid(np.arange(OW, dtype=np.float32),
+#             #                          np.arange(OH, dtype=np.float32), copy=False ), -1)
+#             # import code
+#             # code.interact(local=dict(globals(), **locals()))
+#             #
+#             #img.levels(in_b.tolist(), in_w.tolist(), [1.3,1.3,1.3], out_b.tolist(), out_w.tolist())
+            
+   
+#             #lib_aug.levels(img)
+#             img.levels([0,1,0],[0,0,1],[0,2,0],[3,0,0],[4,3,0])
+            
+#             #x = geo.transform(img, 256,256,)
+
+
+
+#             #cv2.imshow('',img.HWC())
+#             #cv2.waitKey(0)
+            
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# run_test()
+
+# #cv2.warpAffine()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+   
+
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+# IH = IW = 8
+# OH = OW = 8*32
+# C = 1
+# #img = FImage( checkerboard( (IH,IW)).astype(np.float32).reshape(IH,IW) )
+
+# # img =  np.stack(np.meshgrid(np.linspace(0, 1.0, IW, dtype=np.float32), 
+# #                             np.linspace(0, 1.0, IH, dtype=np.float32) ), -1)
+# # img = img[...,0]*img[...,1]
+ 
+# img = FImage.from_file(Path(r'D:\\Develop\\test\\00000.jpg'))#.ch3()
+# IW, IH = img.size
+# # OH = IH*4
+# # OW = IW*4
+
+# grid = np.stack(np.meshgrid(np.linspace( -IW//2, (IW-1)//2, OW, dtype=np.float32), 
+#                              np.linspace( -IH//2, (IH-1)//2, OH, dtype=np.float32) ), -1)
+
+# #grid = np.stack(np.meshgrid(np.linspace(0, IW-1, OW, dtype=np.float32), 
+# #                           np.linspace(0, IH-1, OH, dtype=np.float32) ), -1)
+                    
+# while True:
+#     with timeit():
+#         device = cl.get_best_device()
+#         img_cl = cl.Array.from_numpy(img.CHW().copy(), context=device)
+#         grid_cl = cl.Array.from_numpy(grid, context=device)
+        
+#         mat = FAffMat2().scale(2).translate(50,50);#0.42857142857142857142857142857143)
+#         #img = FImage(img)
+                     
+#         for _ in range(1000):
+#             #q = img.remap(grid, interp = FImage.Interp.LINEAR, border = FImage.Border.CONSTANT).HWC()
+            
+#             #q = img.warp_affine(mat, img.size*2, interp = FImage.Interp.LANCZOS4, border = FImage.Border.REPLICATE).HWC()
+#             q = img.resize(img.width*4, img.height*4, interp = FImage.Interp.LINEAR).HWC()
+            
+#             cv2.imshow('', q)
+#             cv2.waitKey(0)
+            
+#             #q = cl.remap(img_cl, grid_cl, interp=cl.Interp.LINEAR, border_type=cl.BorderType.CONSTANT).transpose((1,2,0)).to_numpy()
+#             #q = cl.warp_affine(img_cl, (img.size*2).yx, mat, interp=cl.Interp.LANCZOS4, border_type=cl.BorderType.REPLICATE).transpose((1,2,0)).to_numpy()
+            
+#             q = cl.resize(img_cl, (img.size*4).yx, interp=cl.Interp.LINEAR).transpose((1,2,0)).to_numpy()
+           
+           
+#             cv2.imshow('', q)
+#             cv2.waitKey(0)
+            
+#         device.finish()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# while True:
+#     with timeit():
+#         device = cl.get_best_device()
+#         img_cl = cl.Array.from_numpy(img.HWC(), context=device).transpose((2,0,1))
+#         grid_cl = cl.Array.from_numpy(grid, context=device)
+        
+#         #mat = FAffMat2().scale(0.42857142857142857142857142857143)
+#         #img = FImage(img)
+                     
+#         for _ in range(1000):
+#             # q = img.remap(grid, interp = FImage.Interp.LINEAR, border = FImage.Border.CONSTANT).HWC()
+            
+#             # # q = img.warp_affine(mat, img.size/2, interp = FImage.Interp.LINEAR, border = FImage.Border.CONSTANT).HWC()
+#             # # #q = img.resize(img.width//2, img.height//2, interp = FImage.Interp.LINEAR).HWC()
+            
+#             # cv2.imshow('', q)
+#             # cv2.waitKey(0)
+            
+#             q = cl.remap(img_cl, grid_cl, interpolation=cl.Interpolation.LINEAR, border_type=cl.BorderType.CONSTANT).transpose((1,2,0)).to_numpy()
+#             #q = cl.warp_affine(img_cl, img.size.yx, mat, interpolation=cl.Interpolation.LINEAR, border_type=cl.BorderType.CONSTANT).transpose((1,2,0)).to_numpy()
+           
+#             cv2.imshow('', q)
+#             cv2.waitKey(0)
+            
+#         device.finish()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+   
+   
+# def func():
+
+#     device = cl.get_best_device()
+    
+#     # img_np = np.ones( (1024,1024,3), np.uint8)
+    
+#     # img_cl = pcl.CLImage.from_np(img_np)
+    
+#     #np.ndarray()
+#     #cl.Array()
+#     #x = cl.dtype.from_numpy(np.float32)
+    
+    
+    
+    
+    
+    
+    
+#     shape = 4
+    
+#     mem_in = device.alloc(shape, cl.uint64)
+#     mem_in.fill(255)
+    
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+    
+#     mem_out = device.alloc(shape, cl.float32)
+    
+    
+#     prog = cl.Program(fr"""
+# __kernel void impl(__global float* O, __global ulong* I)
+# {{  
+#     size_t gid = get_global_id(0);
+#     O[gid] = (float)I[gid] / 255.0f;
+    
+# }}""")
+
+#     device.run(prog, mem_out, mem_in, global_shape=(mem_in.elem_count,) )
+#     print(mem_out.to_numbers())
+#     import code
+#     code.interact(local=dict(globals(), **locals()))
+    
+
+#     # prog = cl.Program(rf"""
+#     # {CL.HProgram.define_array_type('O', CL.float16)}
+#     # __kernel void impl(O_ARG_DEF, float mod)
+#     # {{  
+#     #     size_t gid = get_global_id(0);
+#     #     O_TYPE v = O_LOAD(gid);
+        
+#     #     v = v * mod + 1.0f;
+        
+#     #     O_STORE(gid, v);
+        
+#     # }}
+
+#     # """)
+#     # #np.ones()
+#     # context = device.create_context()
+
+#     # mem = context.alloc(16, CL.float16)
+#     # mem.fill(0)
+#     # print( np.frombuffer(mem.get(), np.float16) )
+#     # context.run(prog, mem, CL.float32(2), global_shape=(mem.size,),)
+#     # context.run(prog, mem, CL.float32(2), global_shape=(mem.size,),)
+    
+#     # print( np.frombuffer(mem.get(), np.float16) )
+    
+# func()
+
+
+# import numpy as np
+# import cv2
+# 
+# from core.lib.image import gen as lib_gen
+# from core.lib.image import aug as lib_aug
+# 
+# from core.lib.image.compute import find_nearest_hist
+
+
+# from core.lib import avecl as CL
+
+# # import io
+# # import ctypes
+
+# # size = 1*1024*1024
+# # while True:
+# #     with timeit():
+# #         for _ in range(1000):
+# #             #b = np.empty( (size,), np.uint8)
+# #             b = bytes(size)
+# #             b2 = memoryview(b).obj
+# #             #b =ctypes.create_string_buffer(size).raw
+# #             #b = bytearray(size)
+# #             # b = io.BytesIO()
+# #             # b.seek(size -1)
+# #             # b.write(bytes(1))
+            
+# #             # b.getbuffer()
+# #             #mv = memoryview(b)       
+# #             #import code
+# #             #code.interact(local=dict(globals(), **locals()))
+
+
+# cv2.setNumThreads(1)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# #img = FImage.from_file(r'D:\\Develop\\test\\00000.png')
+# val_np = np.ones( (1024,1024,3), np.float32)
+
+# device = CL.get_best_device()
+# avail = CL.get_avail_devices()
+
+
+# # def func(d):
+# #     mem = ctx.alloc(1024*1024 + d)
+# #     mem.set( bytes([1]*(1024*1024 + d) ) )
+# #     mem.get()
+    
+
+# # while True:
+# #     with timeit():
+# #         for i in range(100):
+# #             func(i)
+
+# from core.lib import avecl as CL
+
+# s = CL.Shape( (2,4))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# """
+# img = cl.FImage(val_np, context=device.create_context() )
+# img2 = img.u8()
+# """
+
+
+# while True:
+#     with timeit():
+#         for _ in range(100):
+#             # f = FImage(val_np)
+#             # f = f.gaussian_blur(2.0)
+            
+#             t = cl.Tensor.from_value(val_np, device=device)
+#             t = cl.gaussian_blur(t, 2.0)
+#             device.wait()
+#             #v = t.np()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+# import cv2
+# from core.lib.time import timeit
+# from core.lib.image import gen as lib_gen
+# from core.lib.image import aug as lib_aug
+# from core.lib.image import FImage
+# from core.lib.image.compute import find_nearest_hist
+
+# #img = FImage.from_file(r'D:\\Develop\\test\\00000.png')
+
+# #import code
+# #code.interact(local=dict(globals(), **locals()))
+
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# # hist = img.histogram(normalized=True)
+# # hists = np.tile(hist[None,...], (8,1,1) )
+
+# # hists[1:-1,:,:] = 0
+
+# # i = find_nearest_hist(hists, 0, 1, 8)
+# # print(hists)
+# # print(i)
+
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+#             x = img.histogram(normalized=True)
+#             # import code
+#             # code.interact(local=dict(globals(), **locals()))
+
+# q = img.hsv_shift(0,0,0).HWC()
+
+
+
+
+# from core.lib.time import timeit
+# import numpy as np
+# from core.lib.image import FImage
+# import cv2
+# from core.lib.image import gen as lib_gen
+
+# C = 1
+# H = W = 256
+# img = np.ones( (H,W,C), np.uint8 )
+
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+#             #img_out = np.divide(img, 255.0, dtype=np.float32)
+#             lib_gen.noise(256,256)
+#             #img_out = np.empty( (H,W,C), np.float32 )
+#             #c_u8_to_f32(img_out.ctypes.data, img.ctypes.data, H*W*C)
+            
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# C = 3
+# H = W = 256
+
+# img = np.ones( (H,W,C), np.uint8 )
+
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+#             #FImage(img).histogram()
+#             hist_out = np.zeros( (256,C), np.int32 )
+#             c_u8_histogram(hist_out.ctypes.data, img.ctypes.data, H*W,C )
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+
+
+
+
+# from core.lib.time import timeit
+# from core.lib.image import FImage
+# from core.lib.image.aug.Geo import grid_interp
+
+# import torch
+
+
+
+# import numpy as np
+# import cv2
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+# IH = IW = 8
+# OH = OW = 8*64
+# x = checkerboard( (IH,IW)).astype(np.float32).reshape(IH,IW,1)
+
+# grid = np.stack(np.meshgrid(np.linspace( 0, IW-1, OW, dtype=np.float32), 
+#                             np.linspace( 0, IH-1, OH, dtype=np.float32) ), -1)
+
+# img = cv2.remap(x, grid, None, interpolation=cv2.INTER_LINEAR)
+
+# #img = FImage(x).remap(grid, interp=FImage.Interp.LINEAR).HWC()
+# cv2.imshow('', img)
+# cv2.waitKey(0)
+
+# #img = FImage(grid_interp(x, OW, OH))
+                                        
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# # while True:
+# #     with timeit():
+# #         for _ in range(100):
+# #             img = FImage(x).remap(grid)
+# #img.remap()
+
+# # while True:
+# #     with timeit():
+# #         for _ in range(1000):
+# #             grid_interp(x, 8*16,8*16)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# 
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+# import cv2
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+
+
+# from core import ax
+
+# thread_pool = ax.ThreadPool()
+
+# @ax.task
+# def do_file(file_path : Path, low_root : Path, hi_root : Path):
+#     yield ax.switch_to(thread_pool)
+#     img = FImage.from_file(file_path)
+#     H,W,C = img.shape
+
+#     #low_img = img.resize(W//2, H//2, interp=FImage.Interp.LINEAR).resize(W, H, interp=FImage.Interp.LINEAR)
+#     #low_img.save( low_root / (file_path.stem +'.jp2') )
+    
+#     hi_img = img.resize(W*2, H*2, interp=FImage.Interp.LINEAR)
+#     hi_img.save( hi_root / (file_path.stem +'.jp2') )
+    
+    
+    
+
+# @ax.task
+# def main_task():
+#     #root = Path(r'E:\Datasets\Cavill\S01E01\faces')
+#     root = Path(r'E:\Datasets\Cavill\S01E01\faces\test')
+   
+#     low_root = root / 'low'
+#     hi_root = root / 'hi'
+#     #low_root.mkdir(parents=True, exist_ok=True)
+#     hi_root.mkdir(parents=True, exist_ok=True)
+
+#     for value in ax.FutureGenerator( (  ( do_file(file_path, low_root, hi_root), (i,file_path) )
+#                                           for i, file_path in enumerate(lib_path.gen_files_paths(root)) ),
+#                              max_parallel=16, max_buffer=16):
+#         if value is not None:
+#             fut, (i, file_path) = value
+#             print(i)
+#         else:
+#             yield ax.sleep(0)
+
+# main_task().wait()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# import time 
+
+
+# def func():
+#     n = 0
+#     b = bytes(2073600)
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+
+#     for i in range(len(b)):
+#         if b[i] == 0:
+#             n += b[i] + 1
+#     return n
+	
+
+# while True:
+# 	perf = time.perf_counter()
+# 	func()
+# 	print(time.perf_counter() - perf)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# from core.lib.image import gen as lib_gen
+# from core.lib.time import timeit
+
+# import numpy as np
+# import cv2
+
+# from core.lib.math import FVec2f, FLine2f, FAffMat2
+
+# mat = FAffMat2().scale(2.0)
+
+# a = FLine2f(0,0,1,1,)
+
+# x= mat.map([a,a])
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# while True:
+#     img = lib_gen.bezier_inner_area(256, 256, 
+#                                               128, 128+64,
+#                                               255, 128, 
+#                                               128, 128-64,
+#                                               )
+#     cv2.imshow('', img.HWC())
+#     cv2.waitKey(0)
+
+
+# import numpy as np
+# import cv2
+# from core.lib.image import FImage
+
+# from core.lib import path as lib_path
+# from core import ax
+
+# # import numpy as np
+# # import shutil
+    
+
+# import torch
+# import torch.nn.functional as F
+
+
+# def torch_cosine_resize(x : torch.Tensor, size):
+#     """HWC"""
+#     x = x.permute(2,0,1)
+#     C,H,W = x.shape
+#     NW, NH = size
+    
+#     xic = torch.arange(W, dtype=torch.float32, device=x.device)[None,:,None]
+#     yic = torch.arange(H, dtype=torch.float32, device=x.device)[:,None,None]
+#     xoc = torch.arange(NW, dtype=torch.float32, device=x.device)[None,None,:]
+    
+#     imm = torch.empty( (C,NH,NW), dtype=x.dtype, device=x.device)
+    
+
+#     x = x.reshape(C, -1)
+#     for j in range(NH):
+#         krn = torch.cos( (torch.pi/W) * (xic+0.5) * xoc) * \
+#               torch.cos( (torch.pi/H) * (yic+0.5) * j)
+                      
+#         torch.matmul(x, krn.reshape(H*W,NW), out=imm[:,j,:])
+    
+#     imm[:,0,:] /= 2
+#     imm[:,:,0] /= 2
+    
+#     xic = torch.arange(NW, dtype=torch.float32, device=x.device)[None,:,None]
+#     yic = torch.arange(NH, dtype=torch.float32, device=x.device)[:,None,None]
+#     xoc = torch.arange(NW, dtype=torch.float32, device=x.device)[None,None,:]
+    
+    
+#     out = torch.zeros( (C,NH,NW), dtype=x.dtype, device=x.device)
+#     imm = imm.reshape(C, -1)
+#     for j in range(NH):
+#         krn = torch.cos( (torch.pi/NW) * (xoc+0.5) * xic) * \
+#               torch.cos( (torch.pi/NH) * (j  +0.5) * yic)
+        
+#         torch.matmul(imm, krn.reshape(NH*NW,NW), out=out[:,j,:])      
+    
+    
+    
+#     out /= ( max(H,NH)*max(W,NW) ) / 4.0
+#     return out.permute(1,2,0)
+
+
+
+# import numpy as np
+# import cv2
+# from core.lib.image import FImage
+
+# img = FImage.from_file(Path(r'E:\Datasets\DFLFacesets\LaPa\all\labels\11037000386_0.png')) 
+# x = img.HWC()
+# # q = ((x>=1)&(x<=13).astype(np.float32)
+# # q = ((x==15)).astype(np.float32)
+# #q = (x == [1,2,3,4,5,10,11,12,13] ).max(-1, keepdims=True).astype(np.float32)
+
+
+# # import code
+# # code.interact(local=dict(globals(), **locals()))
+
+# q = ((x!=10) & (x !=0)).astype(np.float32) 
+
+# cv2.imshow('', q)
+# cv2.waitKey(0)
+
+
+
+
+
+
+# import torch
+# import torch.nn.functional as F
+
+# torch.backends.cudnn.benchmark = True 
+
+
+
+# x = torch.ones( (16,1,256,256), dtype=torch.float32, requires_grad=True, device='cuda')
+
+# kernel_t = torch.ones( (1,1,64,64), dtype=torch.float32, device='cuda')
+
+# loss_t = F.conv2d(x, kernel_t, padding=0, groups=1)
+# torch.autograd.backward(loss_t, torch.ones_like(loss_t))
+
+
+# """
+#     0
+#                     1
+#                                 2
+#         3
+#                         4
+#                                     5
+#             6
+#                             7
+# 8
+#                             9
+#             10
+#                         11
+#         12
+#                                 13
+#                     14
+#     15
+
+# [8, 0, 15, 3, 12, 6, 10, 1, 14, 4, 11, 7, 9, 2, 13, 5]
+# """
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+# from core import ax
+
+# import numpy as np
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from core.lib.facedesc import FEmbedAlignedFaceInfo
+# import shutil
+    
+# thread_pool = ax.ThreadPool()
+# @ax.task
+# def do_file(file_path : Path, root_mask : Path, root_out, root_mask_out):
+#     yield ax.switch_to(thread_pool)
+
+#     file_name = file_path.stem[:-3]
+#     mask_path = root_mask / (file_name + '.png')
+    
+#     img = FImage.from_file(file_path)
+#     mask = FImage.from_file(mask_path)
+    
+#     mask_np = mask.HWC()
+    
+#     if len( np.argwhere( (mask_np == 6)  ) ) != 0:
+#         # skip with glasses 
+#         return
+    
+#     #mask_np = ((mask_np>=1)&(mask_np<=11)).astype(np.float32)
+#     mask_np = (mask_np == [1,2,3,4,5,10,11,12,13] ).max(-1, keepdims=True).astype(np.float32)
+
+
+#     meta = FEmbedAlignedFaceInfo.from_embed(file_path)
+    
+#     mask = FImage(mask_np).warp_affine(meta.aligned_face.mat, meta.aligned_face.image_size, )
+#     mask.save( root_mask_out / (file_name + '.png') )
+    
+#     shutil.copy(file_path, root_out / (file_name + file_path.suffix))
+    
+# @ax.task
+# def main_task():
+        
+#     root = Path(r'E:\sfhq1\images\images_faces')
+#     root_mask = Path(r'E:\sfhq1\segmentations\segmentations')
+#     root_out = root.parent / (root.name+'_out')
+#     root_mask_out = root_out / 'mask'
+
+#     try:
+#         shutil.rmtree(root_out)
+#         shutil.rmtree(root_mask_out)
+#     except:
+#         ...
+#     root_out.mkdir(exist_ok=True, parents=True)
+#     root_mask_out.mkdir(exist_ok=True, parents=True)
+
+
+
+#     for value in ax.FutureGenerator( (  ( do_file(file_path, root_mask, root_out, root_mask_out), (i,file_path) )
+#                                           for i, file_path in enumerate(lib_path.gen_files_paths(root)) ),
+#                              max_parallel=16, max_buffer=16):
+#         if value is not None:
+#             fut, (i, file_path) = value
+#             print(i)
+#         else:
+#             yield ax.sleep(0)
+    
+
+# import numpy as np
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from core.lib.facedesc import FEmbedAlignedFaceInfo
+# import shutil
+
+# root = Path(r'E:\facesyntetics_100000_faces')
+# root_mask = Path(r'E:\facesyntetics_100000\seg')
+# root_out = root.parent / (root.name+'_out')
+# root_mask_out = root_out / 'mask'
+
+# try:
+#     shutil.rmtree(root_out)
+#     shutil.rmtree(root_mask_out)
+# except:
+#     ...
+# root_out.mkdir(exist_ok=True, parents=True)
+# root_mask_out.mkdir(exist_ok=True, parents=True)
+
+# for i, file_path in enumerate(lib_path.gen_files_paths(root)):
+#     print(i)
+    
+#     file_name = file_path.name.split('_')[0]
+#     mask_path = root_mask / (file_name + '.png')
+    
+#     img = FImage.from_file(file_path)
+#     mask = FImage.from_file(mask_path)
+    
+#     mask_np = mask.HWC()
+    
+#     if len( np.argwhere( (mask_np == 14) | (mask_np == 16) ) ) != 0:
+#         # skip with glasses or beard
+#         continue
+    
+#     mask_np = ((mask_np>=1)&(mask_np<=11)).astype(np.float32)
+    
+#     meta = FEmbedAlignedFaceInfo.from_embed(file_path)
+    
+#     mask = FImage(mask_np).warp_affine(meta.aligned_face.mat, meta.aligned_face.image_size, )
+#     mask.save( root_mask_out / (file_name + '.png') )
+    
+#     shutil.copy(file_path, root_out / (file_name + file_path.suffix))
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# import numpy as np
+
+# img = FImage.from_file(Path(r'E:\facesyntetics_100000\000181.png')) 
+# def_root = Path(r'D:\DXTProjects2\FacesetEnhance\data\def')
+# hi_def_root = Path(r'D:\DXTProjects2\FacesetEnhance\data\hidef')
+
+# for i, file_path in enumerate(lib_path.gen_files_paths(def_root)):
+#     print(i)
+    
+#     img = FImage.from_file(file_path)
+#     img = img.resize(img.width*2, img.height*2, interp=FImage.Interp.NEAREST)
+#     img.save( hi_def_root / (file_path.stem +'.jp2') )
+    
+    
+    
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# def cosine_resize(x, size):
+#     """HWC"""
+#     x = x.transpose(2,0,1)
+#     C,H,W = x.shape
+#     NW, NH = size
+    
+#     xic = np.arange(W, dtype=np.float32)[None,:,None]
+#     yic = np.arange(H, dtype=np.float32)[:,None,None]
+#     xoc = np.arange(NW, dtype=np.float32)[None,None,:]
+    
+#     imm = np.empty( (C,NH,NW), dtype=x.dtype)
+    
+#     x = x.reshape(C, -1)
+#     for j in range(NH):
+#         krn = np.cos( (np.pi/W) * (xic+0.5) * xoc) * \
+#               np.cos( (np.pi/H) * (yic+0.5) * j)
+                      
+#         np.matmul(x, krn.reshape(H*W,NW), out=imm[:,j,:])
+    
+#     imm[:,0,:] /= 2
+#     imm[:,:,0] /= 2
+    
+#     xic = np.arange(NW, dtype=np.float32)[None,:,None]
+#     yic = np.arange(NH, dtype=np.float32)[:,None,None]
+#     xoc = np.arange(NW, dtype=np.float32)[None,None,:]
+    
+    
+#     out = np.zeros( (C,NH,NW), dtype=x.dtype)
+#     imm = imm.reshape(C, -1)
+#     for j in range(NH):
+#         krn = np.cos( (np.pi/NW) * (xoc+0.5) * xic) * \
+#               np.cos( (np.pi/NH) * (j  +0.5) * yic)
+        
+#         np.matmul(imm, krn.reshape(NH*NW,NW), out=out[:,j,:])      
+    
+#     out /= ( max(H,NH)*max(W,NW) ) / 4.0
+#     return out.transpose(1,2,0)
+
+
+
+
+
+
+# #q = cosine_resize(x, (W//2, H//2) )
+# while True:
+#     cv2.imshow('', q )
+#     cv2.waitKey(0)
+#     cv2.imshow('', img.HWC() )
+#     cv2.waitKey(0)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# root = Path(r'D:\DXTProjects2\FacesetEnhance\data')
+# def_root = Path(r'D:\DXTProjects2\FacesetEnhance\data\def')
+
+# for i, file_path in enumerate(lib_path.gen_files_paths(def_root)):
+#     print(i)
+    
+#     img = FImage.from_file(file_path)
+    
+#     img2 = img.gaussian_blur(1.0).resize(img.width//4, img.height//4, interp=FImage.Interp.LANCZOS4 )
+#     img = img2.resize(img.width, img.height,interp=FImage.Interp.LINEAR )
+    
+#     img.save( root / (file_path.stem +'.jp2') )
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# t1 = torch.zeros ( ( 8192, 8192), dtype=torch.float32, device='cuda')
+# while True:
+#     t1 @ t1
+#     time.sleep(0.1)
+
+# from core import ax
+
+# import itertools
+# import random
+
+# @ax.task
+# def data_generator(i) -> int:
+#     yield ax.sleep( random.random() )
+#     return i*10
+
+# @ax.task
+# def main():
+    
+#     gen_swarm = ax.FutureGenerator( ( (data_generator(i), i ) for i in range(5) ), #itertools.count()
+#                                     max_parallel=2, max_buffer=2, ordered=False)
+    
+#     for value in gen_swarm:
+#         if value is not None:
+#             fut, param = value 
+#             print(fut.result, param)
+#         yield ax.sleep(0)
+        
+#     while not gen_swarm.finished:
+#         if (value := gen_swarm.next()) is not None:
+#             fut, param = value 
+#             print(fut.result, param)
+#         yield ax.sleep(0)
+    
+# main().wait()    
+# import numpy as np
+# s = np.random.RandomState()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# 
+# import cv2
+# import math
+
+# from core.lib.time import timeit
+# from core.lib.math import umeyama,FAffMat2, FVec3f
+
+# mat = FAffMat2()
+
+# while True:
+#     with timeit():
+#         for _ in range(100000):
+#             mat.scale(1.0)
+
+# import itertools
+# c = itertools.count()
+                 
+# deg = 180
+# rad = math.pi
+# cos_rad = math.cos(rad)
+# sin_rad = math.sin(rad)
+
+# rot_mat = np.array([ [cos_rad, 0, -sin_rad],
+#                      [0      , 1, 0       ],
+#                      [sin_rad, 0, cos_rad],
+#                     ])
+
+# q = uni_landmarks_3d_68
+# w=(q @ rot_mat).astype(np.float32)
+
+# m = umeyama(q,w)
+
+# p0 = np.array([0,0,0,1], np.float32)
+# p1 = np.array([1,1,1,1], np.float32)
+   
+   
+# p0 @ m
+
+# proj =  np.array([ [1015.0, 0, 0], 
+#                     [0, 1015.0, 0],
+#                     [112.0, 112.0, 1] ], dtype=np.float32)
+
+
+# img = np.zeros( (224,224,1), np.float32 )
+
+# camera_distance = 10
+# pts*= [1,1,-1]
+# pts += [0,0,camera_distance]
+
+# pts = pts @ proj
+# pts = pts[..., :2] / pts[..., 2:]
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# for pt in pts:
+#     pt = pt*112 + 112
+#     x,y,z = pt
+#     print(pt)
+#     cv2.circle(img, [int(x), 224-int(y)], 2, (1.0,), )
+
+
+# cv2.imshow('', img)
+# cv2.waitKey(0)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# from modelhub.onnx import TDDFAV3
+
+# from core.lib import onnxruntime as lib_ort
+# from core.lib.image import FImage
+
+
+# img = FImage.from_file(Path(r'D:\testrash\GenericXSEG_HEAD_faces\0000004.jp2'))
+
+# device = lib_ort.get_best_device(lib_ort.get_avail_gpu_devices())
+# model = TDDFAV3(device)
+
+# x = model.extract(img)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# 
+
+# SW = 8
+
+# q = np.linspace(0., SW-1, SW, dtype=np.float32)
+# w = np.arange(SW, dtype=np.float32)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from datetime import datetime
+# t = datetime.now().timestamp()
+# b = bytearray(16*1024*1024)
+# for i in range(len(b)):
+#     b[i] = i % 255
+# print(datetime.now().timestamp()-t)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import numpy as np
+# from core.lib.math import FRectf, FVec2i, FVec2f, FAffMat2, FVec2fArray, FLine2f, FBBox, FBBoxf, FBBoxi
+
+
+# # b = FBBoxf(0,0,1,1)
+# # b2 = b.transform(FAffMat2().rotate_deg(-45))
+# v = FVec2i(FRectf(0,0,6,6).size) 
+
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# # # r = FRectf.from_ltrb(0,0, 2,4)
+
+# # # r2 = r.inflate_to_square()
+
+# # a = FVec2fArray([ [1,1]])
+# m = FAffMat2.estimate( [(0,0), (1024,0), (0,1024)], [(512,0), (1024+512,0), (512,1024)] )
+
+# q = m.scale_space(1/512,1/512)
+# w = q.scale_space(512,512)
+# r1 = FRectf(FVec2f([   0.,    0.]),
+#              FVec2f([1024.,    0.]),
+#              FVec2f([1024., 1024.]))
+
+# r2 = FRectf(FVec2f([-899.5979,   401.60333]),
+#              FVec2f([ 622.3967,  -899.59796]),
+#              FVec2f([1923.598 ,   622.39667]) )
+# #  [ 401.6034  1923.5979 ]]
+
+
+# r1 = FRectf(FAffMat2(np.array( [[ 1305.5398,   1108.4543  , -694.9971 ],
+#                                  [-1108.4543,   1305.5398 ,   413.45724]] ))) 
+# r2 = FRectf(FAffMat2(np.array([[ 0.5981479,  0.8831175, -0.6787081],
+#                                 [-0.8831175,  0.5981479,  0.4037668]] ))) 
+
+# m = FAffMat2.estimate(r1,
+# l = FLine2f([ (0,0), (1,0)])
+
+# 
+# from modelhub.onnx.SCRFD import SCRFD
+
+# from core.lib import onnxruntime as lib_ort
+# from core.lib.image import FImage
+
+# from core.lib.time import timeit
+
+# img = FImage.from_file(Path(r'D:\testrash\GenericXSEG_HEAD_faces\0000040.jp2'))
+
+# device = lib_ort.get_best_device(lib_ort.get_avail_gpu_devices())
+# model = SCRFD(device)
+
+# while True:
+#     with timeit():
+#         x = model.detect(img, augment_pyramid=True)
+# print(x)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import urllib.parse
+# import urllib.request
+
+# p = Path(r'C:\asd.zip')
+
+# #x = urllib.request.pathname2url(str(p))
+
+# p_uri = p.as_uri()
+# x = urllib.parse.urlparse(p_uri)
+
+
+
+
+# from core.lib.math import FAffMat2, FVec2f, FRectf
+
+
+# a = FRectf.from_ltrb(0,0, 10,10)
+
+# b = FRectf.from_ltrb(20,20, 21,21)
+
+# mat = b.get_transform_mat(a)
+
+# mat = mat.scale(2,2)
+
+# print(mat.map(FVec2f(21,21)))
+
+# from core.lib.collections import FIndices
+
+# print( FIndices([]).difference( FIndices([0,2,5,9])) )
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import numpy as np
+# from core.lib.time import timeit
+# from core.lib.image import FImage
+# from core.lib.image.compute import find_nearest_hist
+
+# img1 = FImage.from_file(Path(r'D:\DevelopPython\test\00000.jpg'))
+# img2 = FImage.from_file(Path(r'D:\DevelopPython\test\00000.png'))
+
+# h1 = img1.histogram().astype(np.float32)
+# h2 = img2.histogram().astype(np.float32)
+
+#hist_count = 20000
+
+# hist_ar = np.concatenate([  h1[None,...],    
+#                             np.tile( h2[None,...], (hist_count,1, 1)) ], 0)
+
+# hist_ar = np.random.randint( 0, 3000, size=(hist_count, 256, 3), dtype=np.int32) 
+
+# with timeit():
+#     S, _, _ = hist_ar.shape
+    
+#     for i in range(S-1):
+#         with timeit():
+            
+#             n_idx = find_nearest_hist(hist_ar, i, i+1, S)
+#             #print(i, n_idx)
+            
+#             hist_ar[[i+1, n_idx]] = hist_ar[[n_idx, i+1]]
+            
+
+# N, BINS, C
+# BINS = hist_ar.shape[1]
+
+# for i in range(hist_ar.shape[0]):
+#     with timeit():
+#         c_hist = hist_ar[i]
+#         t_hist = hist_ar[i+1:]
+        
+#         htm = t_hist.sum(1, dtype=np.float32)
+        
+#         htm /= BINS
+#         htm *= c_hist.sum(0)
+#         htm /= BINS
+
+#         #import code
+#         #code.interact(local=dict(globals(), **locals()))
+#         q = 1 / (np.sqrt(htm) * BINS)
+        
+#         #with timeit():
+#         v = np.sqrt(c_hist*t_hist).sum(1)
+        
+#         d = np.sqrt(1-q*v).sum(-1)
+        
+#         swap_idx = i+1+np.argmin(d)
+        
+#         # tmp = hist_ar[i+1]
+        
+#         # hist_ar[i+1] = hist_ar[swap_idx]
+#         # hist_ar[swap_idx] = tmp
+        
+#         hist_ar[[i+1, swap_idx]] = hist_ar[[swap_idx, i+1]]
+            
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+#from core.lib.dataset.FSIP import FSIP
+# fsip = FSIP.open(r'D:\testrash\ds1')
+#import code
+#code.interact(local=dict(globals(), **locals()))
+
+# l = FList[int]()
+
+# q=l.get_first_by_class(int)
+
+# q = FAlignedFaceInfo()
+
+# lm = FAnnoLmrk2D68(np.zeros( (68,2), np.float32))
+
+# q = q.set_annotations(q.annotations.append(lm))
+
+# anno = q.annotations
+
+# v = anno.get_first_by_class(FAnnoLmrk2D)
+
+# tri = FTriangle2f(0,0, 1,0 , 0,1)
+# q = FTriangle2f.from_state( tri.get_state() )
+
+# p = FPoly2f()
+# p2 = p.add(FVec2f(0,0)).add(FVec2f(1,1)).insert(1, FVec2f(2,2))
+
+# print(p2.as_np())
+
+#l = FLine2f(0,0, 1,1)
+
+# m = FMesh2f([ [ [0,0], [1,0], [0,1]]])
+
+
+# from core.lib.collections import FList
+# from core.lib.facelib import FAlignedFaceInfo, FAnnoLmrk2D, FAnnoLmrk2D68, 
+# from core.lib.math import FAffMat2, FTriangle2f, FTriangle2fList, FPoly2f, FVec2Array, FVec2f, FLine2f, FMesh2f, umeyama
+# from core.lib.time import timeit
+# a = FVec2f(0,0)
+# b = FVec2f(1,0)
+# c = FVec2f(2,0)
+# d = FVec2f(3,0)
+
+# l = FVec2Array([a,b,c,d])
+
+# q = l[9:11]
+
+# a = FAffMat2( np.array( [ [0,1,2], [3,4,5]]))
+
+# l = FTriangle2fList([ [ [0,0],
+#                        [1,0],
+#                        [0,1],
+                      #                       ]])
+                      
+# from core.lib.time import timeit
+
+# import shutil
+# import os
+
+# path = r'D:\testrash\aligned_base_HEAD_faces\123'
+# with timeit():
+#     shutil.rmtree(path)
+    
+# while os.path.isdir(path):
+#     print('isdir')
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# import numpy as np
+# def estimate(X : np.ndarray, Y : np.ndarray):
+    
+#     a1 = X[:,0].sum()
+#     b1 = X[:,1].sum()
+#     c1 = Y[:,0].sum()
+#     d1 = Y[:,1].sum()
+
+#     a2 = (X[:,0]**2).sum()
+#     b2 = (X[:,1]**2).sum()
+    
+#     ad = (X[:,0] * Y[:,1]).sum()
+#     bc = (X[:,1] * Y[:,0]).sum()
+#     ac = (X[:,0] * Y[:,0]).sum()
+#     bd = (X[:,1] * Y[:,1]).sum()
+    
+#     if X.shape[0] != Y.shape[0]:
+#         raise Exception()
+#     N = X.shape[0]
+    
+#     den = N * a2 + N * b2 - a1 * a1 - b1 * b1
+    
+#     if abs(den) < 1e-8:
+#         # The domain points are the same.
+#         # We assume the translation to the mean of the range
+#         # to be the best guess. However if N=0, assume identity.
+#         if N == 0:
+#             s = 1.0
+#             r = 0.0
+#             tx = 0.0
+#             ty = 0.0
+#             #Transform(1.0, 0.0, 0.0, 0.0)
+#         else:
+#             s = 1.0
+#             r = 0.0
+#             tx = (c1 / N) - X[0,0]
+#             ty = (d1 / N) - X[0,1]
+#     else:
+#         s = (N * (ac + bd) - a1 * c1 - b1 * d1) / den
+#         r = (N * (ad - bc) + b1 * c1 - a1 * d1) / den
+#         tx = (-a1 * (ac + bd) + b1 * (ad - bc) + a2 * c1 + b2 * c1) / den
+#         ty = (-b1 * (ac + bd) - a1 * (ad - bc) + a2 * d1 + b2 * d1) / den
+        
+#     print(s,r,tx,ty)
+#     import code
+#     code.interact(local=dict(globals(), **locals()))
+
+    
+# X = np.array([ [0,0], [1,0], [2,0] ], np.float32)
+# Y = np.array([ [0,1], [2,1], [3,1] ], np.float32)
+    
+# q = estimate(X,Y)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+#from modelhub.onnx._3DDFAV3 import _
+
+# import cv2
+
+# import numpy as np
+# from core.lib.math import FRectf, FAffMat2
+
+# while True:
+#     r1 = FRectf(10,20).transform(FAffMat2().rotate_deg(45).translate(10,10))
+    
+#     print(r1.get_ltrb())
+
+
+#     r2 = r1#.inflate_to_square()
+
+#     img = np.zeros( (128,128,1), np.float32)
+
+#     for edge in r2.to_poly().edges:
+#         p0 = edge.p0
+#         p1 = edge.p1
+#         cv2.line(img, (int(p0.x), int(p0.y)), (int(p1.x), int(p1.y)), [1.0] )
+        
+#     cv2.imshow('', img)
+#     cv2.waitKey(0)
+
+#     r2 = r1.inflate_to_square()
+
+
+#     img = np.zeros( (128,128,1), np.float32)
+
+#     for edge in r2.to_poly().edges:
+#         p0 = edge.p0
+#         p1 = edge.p1
+#         cv2.line(img, (int(p0.x), int(p0.y)), (int(p1.x), int(p1.y)), [1.0] )
+        
+#     cv2.imshow('', img)
+#     cv2.waitKey(0)
+
+# from enum import Enum, auto, StrEnum
+# from core.lib.enum import get_enum_id_by_name
+# class Some(StrEnum):
+#     ID0 = 'asd'
+#     ID1 = 'qwe'
+    
+# x = get_enum_id_by_name(Some, 'ID0', Some.ID1)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# # x = mx.StateChoice(lambda: [1,2,3])
+# # x.set(1)
+# # x.set_next()
+
+# from enum import Enum, auto
+
+# class _Image():
+#     def __str__(self): return 'qwe'
+# class _Mask():
+#     ...
+# class ViewMode(Enum):
+#     Image = auto()
+#     Mask = auto()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+"""
+viewpos in world space 
+
+camerapos is cam space
+
+set_view_pos()
+    center camera on pos in world space
+set_camera_pos( )
+
+
+
+"""
+
+# from core.lib import facelib as fl
+
+
+# meta = fl.EmbedFaceMeta.from_embed(Path(r'D:\testrash\GenericXSEG_HEAD_faces\0000010.jp2'))
+# print(meta)
+
+# from core.lib.collections import FIndices
+
+# print(FIndices([0,2,5,9]).indwhere([2,9,99]))
+
+
+
+
+
+# from core.lib.image import FImage
+# import cv2
+
+# #q = FImage.from_file(Path(r'D:\DevelopPPP\projects\DeepXTools\_internal\github_project\DeepXTools\core\qx\QIconDB\assets\accessibility_sharp.png'))
+# #q = #q.f32().ch1_from_a()
+# q = FImage.ones(1080, 1080)
+# q = q.resize(32, 32, smooth=True)
+
+
+
+# import json
+
+# t = { key : t[key] for key in sorted(t.keys()) }
+# s = json.dumps(t, ensure_ascii=False, indent=4)
+
+# s = s.replace('"', "'")
+
+# Path(r'D:\r.txt').write_text(s)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# q = q.resize(96,96)
+# q = q.resize(96,96)
+# q = q.resize(48,48)
+# q = q.resize(24,24)
+
+
+# cv2.imshow('', q.HWC())
+# cv2.waitKey(0)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# dilate=1
+# base_color = [0,1,1]
+# stroke_color = [1,0,1]
+
+# base_mask = q.ch1_from_a().resize(32,32).pad(dilate,dilate,dilate,dilate)
+# base_mask_wider = base_mask.dilate(dilate)
+
+# stroke_mask = base_mask_wider-base_mask
+# colored_stroke = stroke_mask*FImage.full_f32_like(stroke_mask, stroke_color)
+
+# colored_base = base_mask*FImage.full_f32_like(base_mask, base_color)
+
+# bgr = colored_base+colored_stroke
+
+# q = FImage.from_bgr_a(bgr, base_mask_wider)
+
+
+
+
+
+
+
+
+#from core.lib.math import FAffMat2, FVec2f, FRectf, FEllipsef, FCirclef
+
+# vx = 256
+# vy = 256
+# scale = 1.0
+# w = 512
+# h = 512
+
+# m = FAffMat2().translate(-vx,-vy).scale(scale).translate(w/2,h/2)
+
+# m = (m#.translate(-w/2,-h/2)
+#       .translate(-w,-h)
+#       .scale(1.1)
+#       .translate(w,h)
+#       #.translate(w/2,h/2)
+#     )
+# print(m.invert().map([FVec2f(0,0),FVec2f(w/2,h/2),FVec2f(w,h)]))
+
+# r = FRectf(FVec2f(5,5))
+
+# print(r.mat.map([FVec2f(0,0)])[0])
+
+#e = FEllipsef(x_radius=2, y_radius=1).set_pos(FVec2f(1,1)).set_rotation_deg(90)
+# c = FCirclef(pos=FVec2f(2,2), radius=2)
+# #print(e.as_3pts())
+# print(c)
+# print(c.transform(FAffMat2().rotate_deg(90).scale(2.0)))
+
+# r = FRectf(FVec2f(1,1), width=5, height=5)
+
+# for i in range(180):
+#     m = FAffMat2().translate(1,1).rotate_deg(i).translate(-1,1).scale(2.3, 1.6).translate(4,-3)
+#     print(r.transform(m))
+#     #print(r.transform2(m))
+
+# r = FRectf().transform(FAffMat2().scale(2).translate(3,3))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# from core.lib.math.FTransform2D import FRectf
+
+# # aff = Aff().translate(-4,0).scale(0.5).translate(4,0)
+# # print( aff.map( [Vec2(0,0), Vec2(8,0)]) )
+# r = FRectf()
+# r2 = r.clone()
+
+
+# a = Aff().rotate_deg(90).translate(2,2)
+# #print(a.as_np())
+# # print(a.map([Vec2(0,0), Vec2(1,0)]))
+
+# tr = tr.set_pos(FVec2f(2,2)).set_rotation_deg(87)
+# print(tr.mat)
+
+
+# r = FRectf(rotation_deg=45, width=2, height=1)
+
+# #q = r.set_transform(r.transform.translate(2,0))
+# #q = r.rotate_deg_around(90, FVec2f(0.5,0.5))
+# #print(q)
+
+# #m2 = FAffMat2().translate(-0.5,-0.5).rotate_deg(90).translate(0.5,0.5)
+# #print(q.mat.map([FVec2f(0,0),  FVec2f(1,0),FVec2f(0,1), FVec2f(1,1), ]))#
+# # print(q.transform.pos, q.transform.rotation_deg)
+# # r = FRectf.from_3pts( FVec2f(0,0), FVec2f(0,1), FVec2f(1,0), )
+
+# r2 = r.inflate_to_square()
+
+
+"""
+FImmutable
+
+HFImmutable
+    
+
+FParent
+    .set_parent()    
+        
+
+FChild
+    .set_some
+        m = self
+        m = m.mutate
+        
+        m.parent.on_child_mutated(self, m)
+            
+        
+on_child_mutated(self, child, mutated_child):
+    m = self
+    
+    new_childs = m._childs.
+    
+        
+    m.parent.on_child_mutated(self)
+
+
+FList
+immutable list
+
+FListElement
+an immutable element of immutable list
+mutating element also mutates FList also mutates parent that contains FList
+also mutates parent that contains parent
+
+
+
+
+"""
+
+# from core.lib.time import timeit
+# a = 1
+# b = 2
+# c = 3
+
+# while True:
+#     with timeit():
+#         for _ in range(1000000):
+#             #q = (a == 1) & (b==2) & (c==3)
+#             q = a == 1 and b==2 and c==3
+
+
+
+
+
+# # N, BINS, C
+# BINS = hist_ar.shape[1]
+
+# for i in range(hist_ar.shape[0]):
+#     with timeit():
+#         c_hist = hist_ar[i]
+#         t_hist = hist_ar[i+1:]
+        
+#         hcm = c_hist.sum(0) / BINS
+        
+#         #with timeit():
+#         htm = t_hist.sum(1) / BINS
+        
+#         q = 1 / (np.sqrt(hcm*htm) * BINS)
+        
+#         #with timeit():
+#         v = np.sqrt(c_hist*t_hist).sum(1)
+        
+#         d = np.sqrt(1-q*v).sum(-1)
+        
+#         swap_idx = i+1+np.argmin(d)
+        
+#         tmp = hist_ar[i+1]
+        
+#         hist_ar[i+1] = hist_ar[swap_idx]
+#         hist_ar[swap_idx] = tmp
+    
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# #from typing import Iterator
+# from core import ax, mx, qx
+
+# from core.ax._test import run_test
+# #from core.ax.Future import FutureQueue
+# #run_test()
+# #import code
+# #code.interact(local=dict(globals(), **locals()))
+
+# @ax.task
+# def test_task(i) -> int:
+#     print('start test_task', i)
+#     yield ax.sleep(1)
+#     return i
+
+# def fut_gen():
+#     yield None
+#     yield test_task(0)
+#     #raise StopIteration()
+#     yield None
+#     yield test_task(1)
+#     yield None
+#     yield test_task(2)
+
+# def fut_gen():
+#     return test_task(0)
+#     raise StopIteration()
+
+# @ax.task
+# def main():
+    
+#     #q = 
+#     #q = ax.FutureQueue( fut_gen, max_parallel=2 )
+#     #ax.future_queue(  (test_task(i) for i in range(10)), max_parallel=2 ):   
+#     #   
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+
+#     #ax.FutureQueue(gen , max_parallel=2 ):
+#     gen = ( (test_task(i), i) for i in range(10))    
+    
+#     for x, user_param in ax.iter_future_queue(gen , max_parallel=2):
+#         if x is None:
+#             yield ax.sleep(0)
+#         else:
+#             print(x, user_param)
+    
+#     import code
+#     code.interact(local=dict(globals(), **locals()))
+
+
+#     # for x in ax.future_queue( (test_task(i) for i in range(10)), max_parallel=2, prefetch=4):
+#     #     if x is None:
+#     #         yield ax.sleep(0)
+#     #     else:
+#     #         print(x)
+        
+# main().wait()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+
+# # 
+# def func():
+#     raise StopIteration()
+#     return 1
+
+# def iter_from_callable(func):
+#     while True:
+#         try:
+#             yield func()
+#         except StopIteration:
+#             return
+
+# q = iter_from_callable(func)
+
+# for x in iter_from_callable(func):
+#     print(x)
+
+
+
+# from core.lib.collections import FDict, HFDict
+
+# c = mx.Chain[FDict]()
+
+
+# #l1 = c.attach(lambda state: state|{1:1})
+# #print(c.forward(FDict()))
+
+# s : qx.QObject.IState = qx.QObject.State(FDict())
+
+# l = s.save_chain.attach(lambda state : state | {1:1})
+
+# """
+
+
+# class QObjectState:
+#     @property
+#     def state(self) -> HFDict:
+#         mutable dict that will be saved by QApplication in UI settings file
+    
+#     def ev_update_state() -> mx.IEvent0_r
+#         event is called before QApplication will save .state
+#         you should commit your changes to .state here
+# """
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# # Either can be updated directly using state[key] = value
+# # or state.update_attach(lambda state: state|{'key' : value}).dispose_with(bag)
+# # state.update_via_attachers()
+
+
+# from core.lib.collections import FIndices, sequence_removed_indices
+
+# import numpy as np
+
+# ind = FIndices([2,3,8,9,12])
+# ind.difference([14])
+# x = FIndices([2,4,6]) & FIndices([6,8,10])
+# #FIndices([6,8,10]).discard_l(8)
+# x = FIndices.from_range(100)
+
+# x = FIndices([1,5, 10]) 
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# q = np.arange(15)
+# m = np.ones_like(q, dtype=bool)
+# #w = np.delete(q, [0,4,5])
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+#w = Indices([2,3,8,9,12])
+
+
+# import re
+
+# pair_type = "ASD;"
+# print( re.findall('\w+', pair_type) )
+
+
+# from core import qx, qt
+
+# c = qt.QKeyCombination(qt.Qt.KeyboardModifier.ControlModifier, qt.Qt.Key.Key_Space)
+# c = qt.QKeyCombination(qt.Qt.Key.Key_Control)
+
+# k = qt.QKeySequence(c)
+# print(k.toString())
+
+# a = {1,2,3}
+
+# print( a.difference({2,4}) )
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from core.lib.time import timeit
+
+# a = frozenset(range(1000000))
+# b = frozenset(range(1000000))
+
+# while True:
+#     with timeit():
+#         a is b
+
+
+
+# from core.lib.image import FImage
+
+# from core.lib.image.gen import clouds
+
+# for i in range(500000):
+#     if i % 10 == 0:
+#         print(i)
+        
+#     img = clouds(512,512)
+#     img.save(Path(r'E:\TrashTest\500kDataset') / f'{i:07}.jpg')
+
+# from fnmatch import fnmatch
+
+
+# from core.lib.time import timeit
+
+# while True:
+#     with timeit():
+
+#         for _ in range(200000):
+#             fnmatch('0000003_0.jpg', '*_0')
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# x = np.ones( (4,), np.float32)
+# q = np.float32(5.0)
+# #np.array()
+
+# r = x.view()
+
+
+# s = FDict({1:1, 2:2})
+
+# q=s.updated( {2:3, 3:3})
+# w=q.set(3,4)
+
+
+# f = lambda one_time={0:0}: one_time.pop(0, None)
+
+# state = {}
+# state_holder=PlaceHolder[FDict|None](state.get('mx_media_source.mx_source_type', None))
+# from core.lib.collections import FDict, HFDict
+
+# s = FDict({1:1})
+
+# f = HFDict(s)
+
+# q = f.pop(1, 2)
+# from collections import deque
+
+# d = deque( (1,2,3))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# x2 = np.ndarray(x.shape, x.dtype, x.data.toreadonly())
+
+# class StateSequence(tuple):
+#     def __new__(self, iterable) -> StateSequence:
+#         return tuple.__new__(StateSequence, iterable )
+
+# class StateSet(frozenset):
+#     def __new__(self, iterable, **kwargs) -> StateSet:
+#         return frozenset.__new__(StateSet, iterable )
+    
+# class FDict(dict):
+#     def __new__(self, mapping) -> FDict:
+#         return dict.__new__(FDict, mapping )
+    
+# #s = FDict( {} )
+
+# q = [0,1,2]
+
+# it = (v for v in q)
+# it2 = (v for v in it)
+
+#from core.lib.sickle import 
+
+
+
+
+# from core.lib import path as lib_path
+# from core.lib import time as lib_time
+# from itertools import groupby
+# from core.lib.dataset.FSIP import FSIP
+
+# # # a = [ 'qwe.zip', 'qwe.jpg', 'asd.jpg']
+
+# # # for q,w in groupby(a, key=lambda el: el.split('.')[0]):
+# # #     print(q, list(w))
+    
+# # filepaths = lib_path.get_files_paths(r'E:\FakeFaceVideoSources\Datasets\DFL\Randomfaces source',subdirs=True, relative=True) #aligned_various_HEAD
+# # print(filepaths[0])
+
+# fsip = FSIP(Path(r'E:\TrashTest\Mini'))
+
+
+# #result = fsip.move_items({0,2}, Path(r'E:\TrashTest\Mini_trash'))
+# result = fsip.delete_items({0,2})
+
+# print(result)
+# d = {1:1}
+
+# import pickle
+# from typing import Mapping
+# from types import MappingProxyType
+
+# ref = {1:1,2: 2}
+# d = MappingProxyType(ref)
+
+
+# q = pickle.dumps( frozenset() )
+
+
+# from core.lib.time import timeit
+
+# x = (int, str, bool)
+# while True:
+#     with timeit():
+#         a = 0
+#         for _ in range(1000000):
+#             isinstance(a, x)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# with lib_time.timeit():
+#     for q,w in groupby(filepaths, key=lambda el: el.stem):
+#         w = list(w)
+#         if len(w) > 1:
+#             print(q, w)
+
+
+# 
+
+# q = qt.QColor(1,2,3)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# from core.lib import path as lib_path
+
+# import shutil
+# #p = lib_path.get_dir_paths(r'E:\FakeFaceVideoSources\Datasets\DFL\Generic XSEG Source fixed\GenericXSEG_HEAD_faces', subdirs=True)
+# p = lib_path.get_files_paths(r'E:\FakeFaceVideoSources\Datasets\DFL\Generic XSEG Source fixed\GenericXSEG_HEAD_faces', subdirs=True)
+# #lib_path.rmtree(Path(r'E:\FakeFaceVideoSources\Datasets\DFL\Generic XSEG Source fixed\GenericXSEG_HEAD_faces'))
+# #print(p)
+
+# shutil.rmtree(Path(r'E:\FakeFaceVideoSources\Datasets\DFL\Generic XSEG Source fixed\GenericXSEG_HEAD_faces'))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from io import BytesIO
+# import numpy as np
+# io = BytesIO()
+
+# #io.write()
+
+# x = np.float32(1).data.obj
+
+# io.write( x.data.obj )
+
+# class GrowingArray:
+#     def __init__(self, dim : int, dtype ):
+#         self._dim = dim
+#         self._dtype = dtype
+#         self._dtype_item_size = np.dtype(dtype).itemsize
+#         self._bytes = BytesIO()
+        
+    
+#     def add(self, v : np.ndarray):
+#         if v.dtype != self._dtype:
+#             raise ValueError('dtype')
+        
+#         if v.shape[-1] != self._dim:
+#             raise ValueError('_dim')
+        
+#         self._bytes.write ( v.data.obj )
+    
+#     def as_np(self) -> np.ndarray:
+#         v = np.frombuffer(self._bytes.getvalue(), self._dtype, self._bytes.tell() // self._dtype_item_size )
+#         v=v.reshape(-1, self._dim)
+#         return v
+    
+# g = GrowingArray(3, np.float32)
+
+# g.add( np.float32([1,2,3]) )
+# n1 = g.as_np()
+# g.add( np.float32([1,2,3]) )
+# n2 = g.as_np()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+# from core import ax
+
+# from core.ax._test import run_test
+
+# @ax.task
+# def func():
+#     yield ax.time_barrier(1.0)
+    
+    
+# t = func()
+# t.wait()
+
+# # run_test()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# from collections import UserDict
+
+# from typing import MutableMapping, Mapping
+
+# class FDict(dict):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs) 
+        
+# s = FDict()
+# print( isinstance(s, Mapping))
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# # n['p1'] = Path(r'asd.qwe')
+
+# # #n.asd1 = {'1':3}
+# n['asd'] = None
+
+# a=b'000'
+
+# from core import mx
+# import numpy as np
+    
+# n = mx.FDict.create()
+# n.get_sub_state('asd')['123']=np.ones( (2,))
+
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+"""
+
+state['qwe.wrt.sdfg1']
+
+state.get_sub_state('qwe.wrt.sdfg1') -> FDict
+
+state.set_sub_state('qwe.wrt.sdfg1', {} )
+
+"""
+
+# import json
+
+# #
+# k = ('.',0)
+# q={k:0}
+
+# #x = json.dumps( q )
+
+
+
+
+
+# def func2(x):
+#     print(x)
+    
+# def func():
+    
+#     return lambda a=object(): func2(a)
+
+# f = func()    
+# class A():
+#     def __init__(self):
+#         self.__q = 0
+        
+# a = A()
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# from pathlib import Path
+
+# p = Path(r'D:/vert_cam.mp4')
+# q = p.as_uri()
+
+# from core.lib.time import timeit
+
+# import itertools
+# input_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+# remove_indices = [-1,1,4,9,12]
+
+
+# #[*itertools.chain(*[ input_list[slice(start, stop)] for start, stop in zip(*[ ( ([None]+[i+1 for i in sorted_remove_indices]), (sorted_remove_indices+[None]) ) for sorted_remove_indices in [sorted(list(set(remove_indices)))] ][0] ) ])]
+
+# q=[  input_list[slice(start, stop)] for start, stop in zip(*[ ( ([None]+[i+1 for i in sorted_remove_indices]), (sorted_remove_indices+[None]) ) for sorted_remove_indices in [sorted(list(set(remove_indices)))] ][0] ) ]
+# w=[  slice(start, stop) for start, stop in zip(*[ ( ([None]+[i+1 for i in sorted_remove_indices]), (sorted_remove_indices+[None]) ) for sorted_remove_indices in [sorted(list(set(remove_indices)))] ][0] ) ]
+
+# print(q)
+# print(w)
+
+# def list_removed_indices(l : list, indices : set, indices_in_range = False):
+#     """
+#     Remove multiple indices from the list at one time.
+    
+#     ```
+#         indices_in_range  True, if you gaurantee indices in range of >= 0 and < len(l)
+#     ```
+#     """
+#     if not isinstance(indices, set):
+#         raise ValueError('Indices must be a set')
+
+#     if not indices_in_range:
+#         indices = [ind for ind in indices if ind >= 0 and ind < len(l)]
+
+#     indices = sorted(indices)
+    
+#     return sum( (l[slice(start, stop)] for start, stop in zip( ([None]+[i+1 for i in indices]), (indices+[None]) )), [] )
+        
+# from core.lib.python import sequence_removed_indices
+# print( sequence_removed_indices([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], {0,4,9}))
+
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# from core.lib import facelib
+# from core.lib import math
+
+
+
+# # # face = Face.create()
+# # fr = facelib.Frame.create(facelib.FrameInfo.create(256,256))
+
+
+# # # fr = Frame.from_state(fr.get_state())
+
+
+
+# f = facelib.Face.from_state(f.get_state())
+# # fr = fr.set_faces([f])
+
+
+# emb = facelib.EmbedFaceMeta.create( facelib.AlignedFaceInfo.create().set_mat( math.Aff()) )
+
+# emb.embed_to( Path(r'D:\test_trump.png') )
+
+# emb = facelib.EmbedFaceMeta.from_embed( Path(r'D:\test_trump.png') )
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# from core.lib import sfeas
+# from uuid import uuid4
+# import pickle
+
+# u1 = uuid4()
+# u2 = uuid4()
+
+# a = {1:3}
+
+# sfeas.append( Path(r'D:\test_trump.png'), u1, pickle.dumps(a))
+# sfeas.append( Path(r'D:\test_trump.png'), u2, pickle.dumps(a))
+
+# q = sfeas.read( Path(r'D:\test_trump.png'), u1 )
+
+# q = pickle.loads(q)
+
+# import weakref
+# class A():...
+
+# def asd():
+#     a = A()
+#     q = weakref.ref(a)
+#     return q
+
+# q = asd()
+
+
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# 
+
+# from core.lib.image import aug,gen
+
+# img = FImage( np.full( (256,256,3), 255, dtype=np.uint8))
+
+# img = img.f32().HWC()
+
+# while True:
+#     with timeit():
+#         x = img
+#         x -= x.min()
+#         x /= x.max()
+#         #for _ in range(64):
+#         #    aug.CachedOcc._generate_pattern(256,256)
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+# img = FImage( np.full( (256,256,3), 255, dtype=np.uint8))
+
+# img = img.f32()
+
+
+# while True:
+#     with timeit():
+#         for _ in range(1000):
+#             img.u8()
+        
+
+
+# 
+
+# from core.lib.time import timeit
+# import random
+
+# # ar=np.linspace(0, 1023, 1024, dtype=np.int32)
+
+# #x = random.randint(0, 1)
+
+# while True:
+#     with timeit():
+#         aug.CachedOcc._generate_pattern(224,224)
+#         aug.CachedOcc._generate_mask(224,224)
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+# while True:
+#     with timeit():
+#         for _ in range(10000):
+#             ar = [*range(1024)]
+#             #np.random.shuffle(ar)
+#             #random.shuffle(ar)
+    
+
+
+
+
+
+# import numpy as np
+# from core.lib.image import FImage
+# import cv2
+
+# occ = aug.CachedOcc(max_count=1)
+
+# from core.lib.collections import RingBuffer
+
+# r = RingBuffer(4)
+
+
+
+
+# iter_fps = FPSCounter()
+
+# while True:
+    
+#     with timeit():
+        
+#         img, mask = occ.generate( gen.noise(256,256) , use_cached=True)
+    
+#     cv2.imshow('', img.HWC())
+#     cv2.waitKey()
+    
+
+
+# 
+# from core.lib import mp as lib_mp
+# import numpy as np
+# from core import ax
+        
+# class MClass(lib_mp.SubprocessClass):
+        
+#     def __init__(self):
+#         super().__init__()
+#         self._job_thread_pool = ax.ThreadPool().dispose_with(self)
+        
+#     @ax.task
+#     def process(self, job):
+        
+#         yield ax.switch_to(self._job_thread_pool)
+        
+#         #print("job", job)
+#         try:
+#             yield ax.sleep(1.0)        
+#         except:
+#             print("job task cancelled")
+#         return 1
+        
+# @ax.task
+# def main():
+#     s = lib_mp.SubprocessPool(MClass, process_count=8, prio=lib_mp.SubprocessPool.Priority.IDLE)
+    
+#     jobs = [s.send( np.zeros((64,1024,1024,3), np.uint8) ) for i in range(8)]
+    
+#     #yield ax.sleep(1.0)
+    
+#     yield ax.wait(jobs)
+    
+#     #
+    
+#     for job in jobs:
+#         if job.succeeded:
+#             print("job success", job.result)   
+#         else:
+#             print("job cancel", job.error)
+#     s.dispose()    
+#     import code 
+#     code.interact(local=dict(globals(), **locals()))
+
+#     #while True:
+#     #    
+#     #    yield ax.sleep(0)
+        
+# if __name__ == '__main__':
+#     main().wait()
+    
+#     import code 
+#     code.interact(local=dict(globals(), **locals()))
+
+    
+    
+# import cProfile
+
+# def func():
+#     a = {}
+# with cProfile.Profile() as pr:
+#     for i in range(10000):
+#         func()
+
+# pr.print_stats()
+# import code 
+# code.interact(local=dict(globals(), **locals()))
+
+
+# from core.lib import facelib
+# from core.lib.math import Aff, Rect, Vec2
+# from core.lib.DFLIMG import DFLIMG
+
+# from core.lib import path as lib_path
+# #
+
+# in_path = Path(r'E:\FakeFaceVideoSources\Datasets\DFL\Generic XSEG Source fixed\GenericXSEG_HEAD')
+# for filepath in lib_path.get_files_paths(in_path, extensions=['.jpg','.png']):
+    
+#     if (dflimg := DFLIMG.load(filepath)) is not None:
+#         lmrks = dflimg.get_landmarks()
+        
+#         lmrks = facelib.FAnnoLmrk2D.create(facelib.FAnnoLmrk2D.Type.L68, lmrks)
+#         import code 
+#         code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+
+
+# from core.lib.clang import Compiler
+
+# import numpy as np
+# import cv2
+# from core.lib.time import timeit
+# from core.lib import clang 
+# from ctypes import c_float, c_void_p, c_int32
+# from core.lib.ctypes import dll_import
+
+# c = Compiler()
+
+# #.minimal_c().optimize()
+# #.include('test.o')
+
+# compiler = clang.Compiler(Path(__file__).parent).shared_library('test').minimal_c().optimize().include('test.cpp').compile()
+# compiler.print_args()
+
+# def c_test(img_out : c_void_p, img : c_void_p, count : c_int32, q : c_float, x : c_float, y : c_float) -> None: ...
+
+
+# img = np.full( (256,256,1), 0.5, np.float32)
+# img_out = np.empty_like(img)
+# with timeit():
+#     for _ in range(10000):
+#         c_test(img_out.ctypes.data, img.ctypes.data, 256*256, 0.5, 1.0, 0.0)
+        
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+
+
+# x = FImage(np.full( (1024,1024,1), 0.5, np.float32 ))
+
+
+# with timeit():
+#     for _ in range(1000):
+#         y = x.apply(lambda x: np.where(x >= 0.5, np.float32(1.0), np.float32(0.0)) )
+#         #y = x.apply(lambda x: np.where(x >= 0.5, 1.0, 0.0).astype(np.float32) )
+#         #y = x.apply_ge_replace(0.5, 1.0, 0.0)
+# import gc
+# objs = gc.get_objects()
+# print('Total: ', len(objs))
+# d = {}
+# for obj in objs:
+#     t = type(obj)
+#     d[t] = d.get(t, 0) + 1
+    
+# ar = [ (k,v) for k, v in d.items() ]
+# ar = sorted(ar, key=lambda x: x[1], reverse=True)
+
+# print('--')
+# for t,c in ar:
+#     print(t, c)    
+    
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# #gen.circle_faded(128,128)
+# img = aug.circle_faded_mask(128, 128)
+# img = aug.levels(img)
+# img = img.blend(img, img)
+
+# img = aug.hsv_shift(img.ch(3).u8())
+# #img = gen.noise(128,128)
+# #img = aug.cut_edges_mask(128,128)
+# cv2.imshow('', img.HWC())
+# cv2.waitKey(0)
+
+
+
+# import numpy as np
+# import cv2
+
+# import math
+# from core.lib.math import Vec2, Line2
+
+# l0 = Line2( Vec2(0,0), Vec2(1,0))
+# l1 = Line2( Vec2(0,0), Vec2(0,1))
+# pt0 = Vec2(1.0, 0.0)
+# pt1 = Vec2(0.0, 1.0)
+# pt2 = Vec2(-1.0, 0.0)
+# c = Vec2(0.5, 0.5)
+
+# print( pt0.angle(pt1) )
+
+# from core.lib.facelib.FAnnoLmrk2D import lmrks_106_to_68_mean_pairs
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# # print( pt2.rotate_around(pt0, -math.pi) )
+# # import code
+# # code.interact(local=dict(globals(), **locals()))
+
+# uni_landmarks_68 = q = np.float32([
+#     (0.0792396913815, 0.339223741112), (0.0829219487236, 0.456955367943),
+#     (0.0967927109165, 0.575648016728), (0.122141515615, 0.691921601066),
+#     (0.168687863544, 0.800341263616), (0.239789390707, 0.895732504778),
+#     (0.325662452515, 0.977068762493), (0.422318282013, 1.04329000149),
+#     (0.531777802068, 1.06080371126), (0.641296298053, 1.03981924107),
+#     (0.738105872266, 0.972268833998), (0.824444363295, 0.889624082279),
+#     (0.894792677532, 0.792494155836), (0.939395486253, 0.681546643421),
+#     (0.96111933829, 0.562238253072), (0.970579841181, 0.441758925744),
+#     (0.971193274221, 0.322118743967), (0.163846223133, 0.249151738053),
+#     (0.21780354657, 0.204255863861), (0.291299351124, 0.192367318323),
+#     (0.367460241458, 0.203582210627), (0.4392945113, 0.233135599851),
+#     (0.586445962425, 0.228141644834), (0.660152671635, 0.195923841854),
+#     (0.737466449096, 0.182360984545), (0.813236546239, 0.192828009114),
+#     (0.8707571886, 0.235293377042), (0.51534533827, 0.31863546193),
+#     (0.516221448289, 0.396200446263), (0.517118861835, 0.473797687758),
+#     (0.51816430343, 0.553157797772), (0.433701156035, 0.604054457668),
+#     (0.475501237769, 0.62076344024), (0.520712933176, 0.634268222208),
+#     (0.565874114041, 0.618796581487), (0.607054002672, 0.60157671656),
+#     (0.252418718401, 0.331052263829), (0.298663015648, 0.302646354002),
+#     (0.355749724218, 0.303020650651), (0.403718978315, 0.33867711083),
+#     (0.352507175597, 0.349987615384), (0.296791759886, 0.350478978225),
+#     (0.631326076346, 0.334136672344), (0.679073381078, 0.29645404267),
+#     (0.73597236153, 0.294721285802), (0.782865376271, 0.321305281656),
+#     (0.740312274764, 0.341849376713), (0.68499850091, 0.343734332172),
+#     (0.353167761422, 0.746189164237), (0.414587777921, 0.719053835073),
+#     (0.477677654595, 0.706835892494), (0.522732900812, 0.717092275768),
+#     (0.569832064287, 0.705414478982), (0.635195811927, 0.71565572516),
+#     (0.69951672331, 0.739419187253), (0.639447159575, 0.805236879972),
+#     (0.576410514055, 0.835436670169), (0.525398405766, 0.841706377792),
+#     (0.47641545769, 0.837505914975), (0.41379548902, 0.810045601727),
+#     (0.380084785646, 0.749979603086), (0.477955996282, 0.74513234612),
+#     (0.523389793327, 0.748924302636), (0.571057789237, 0.74332894691),
+#     (0.672409137852, 0.744177032192), (0.572539621444, 0.776609286626),
+#     (0.5240106503, 0.783370783245), (0.477561227414, 0.778476346951)])
+
+
+# q[:,0] -= q[:,0].min()
+# q[:,1] -= q[:,1].min()
+
+# q[:,0] /= q[:,0].max()
+# q[:,1] /= q[:,1].max()
+
+# q = np.array([[0.        , 0.17856914],
+#        [0.00412831, 0.31259227],
+#        [0.0196793 , 0.44770938],
+#        [0.04809872, 0.5800727 ],
+#        [0.10028344, 0.70349526],
+#        [0.17999782, 0.81208664],
+#        [0.27627307, 0.90467805],
+#        [0.38463727, 0.98006284],
+#        [0.5073561 , 1.        ],
+#        [0.63014114, 0.9761118 ],
+#        [0.7386777 , 0.89921385],
+#        [0.8354747 , 0.80513287],
+#        [0.91434467, 0.6945623 ],
+#        [0.9643504 , 0.56826204],
+#        [0.9887058 , 0.432444  ],
+#        [0.9993123 , 0.29529294],
+#        [1.        , 0.15909716],
+#        [0.09485531, 0.07603313],
+#        [0.15534875, 0.02492465],
+#        [0.2377474 , 0.01139098],
+#        [0.32313403, 0.02415778],
+#        [0.4036699 , 0.05780071],
+#        [0.56864655, 0.0521157 ],
+#        [0.65128165, 0.01543965],
+#        [0.7379608 , 0.        ],
+#        [0.82290924, 0.01191543],
+#        [0.88739765, 0.06025707],
+#        [0.48893312, 0.15513189],
+#        [0.48991537, 0.24343018],
+#        [0.49092147, 0.33176517],
+#        [0.49209353, 0.422107  ],
+#        [0.397399  , 0.48004663],
+#        [0.4442625 , 0.49906778],
+#        [0.4949509 , 0.5144414 ],
+#        [0.54558265, 0.49682876],
+#        [0.59175086, 0.47722608],
+#        [0.194157  , 0.16926692],
+#        [0.24600308, 0.13693026],
+#        [0.31000495, 0.13735634],
+#        [0.36378494, 0.17794687],
+#        [0.3063696 , 0.19082251],
+#        [0.24390514, 0.19138186],
+#        [0.6189632 , 0.17277813],
+#        [0.67249435, 0.12988105],
+#        [0.7362857 , 0.1279085 ],
+#        [0.7888591 , 0.15817115],
+#        [0.74115133, 0.18155812],
+#        [0.6791372 , 0.18370388],
+#        [0.30711025, 0.6418497 ],
+#        [0.3759703 , 0.6109595 ],
+#        [0.44670257, 0.5970508 ],
+#        [0.49721557, 0.60872644],
+#        [0.5500201 , 0.5954327 ],
+#        [0.6233016 , 0.6070911 ],
+#        [0.69541407, 0.6341429 ],
+#        [0.628068  , 0.70906836],
+#        [0.5573954 , 0.7434471 ],
+#        [0.50020397, 0.7505844 ],
+#        [0.44528747, 0.74580276],
+#        [0.37508208, 0.7145425 ],
+#        [0.3372878 , 0.64616466],
+#        [0.44701463, 0.64064664],
+#        [0.49795204, 0.6449633 ],
+#        [0.5513943 , 0.6385937 ],
+#        [0.6650228 , 0.63955915],
+#        [0.5530556 , 0.67647934],
+#        [0.4986481 , 0.68417645],
+#        [0.44657204, 0.6786047 ]], dtype=np.float32)
+
+# #q[:9, 0] = 0.5
+# q[9:17] = q[7::-1]
+# q[9:17, 0] = 1.0 - q[9:17, 0] 
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# img = np.zeros( (256,256,1), np.float32 )
+
+# for pt in q:
+#     x,y = pt
+#     cv2.circle(img, [int(x*256), int(y*256)], 2, (1.0,), )
+
+
+# cv2.imshow('', img)
+# cv2.waitKey(0)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from core.lib.image import LSHash64, LSHash64Similarity, FImage
+# from core.lib.time import timeit
+# from core.lib import path as lib_path
+# import time
+# #len = 10000
+
+# time.sleep(2)
+
+# imagespaths = lib_path.get_files_paths(r'D:\DXTProjects1\Shia', extensions=FImage.AVAIL_SUFFIXES)
+
+# hash_sim = LSHash64Similarity(len(imagespaths), similarity_factor=8)
+
+# with timeit('asd'):
+#     for idx, imagespath in enumerate(imagespaths):
+#         hash = FImage.from_file(imagespath).get_lshash64()
+#         hash_sim.add(idx, hash )
+    
+    
+# print(hash_sim.get_similarities())
+
+
+
+# import numpy as np
+
+# x = np.ones( (5,5), np.float32 )
+# q = x[:2,:2]
+
+# c = np.ascontiguousarray(x)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import cv2
+# from core.lib import time as lib_time
+# # from core.lib.image import gen as lib_gen
+# # from core.lib.image import aug as lib_aug
+# from core.lib.image import FImage
+
+
+
+
+# def cosine_resize(x, size):
+#     """HWC"""
+#     x = x.transpose(2,0,1)
+#     C,H,W = x.shape
+#     NW, NH = size
+    
+    
+#     xic = np.arange(W, dtype=np.float32)[None,:,None]
+#     yic = np.arange(H, dtype=np.float32)[:,None,None]
+#     xoc = np.arange(NW, dtype=np.float32)[None,None,:]
+    
+#     imm = np.empty( (C,NH,NW), dtype=x.dtype)
+    
+#     x = x.reshape(C, -1)
+#     for j in range(NH):
+#         krn = np.cos( (np.pi/W) * (xic+0.5) * xoc) * \
+#               np.cos( (np.pi/H) * (yic+0.5) * j)
+                      
+#         np.matmul(x, krn.reshape(H*W,NW), out=imm[:,j,:])
+    
+#     imm[:,0,:] /= 2
+#     imm[:,:,0] /= 2
+#     #imm /= 4
+    
+#     xic = np.arange(NW, dtype=np.float32)[None,:,None]
+#     yic = np.arange(NH, dtype=np.float32)[:,None,None]
+#     xoc = np.arange(NW, dtype=np.float32)[None,None,:]
+    
+#     # mod_x = np.full( (NW,), 0.5, np.float32)
+#     # mod_x[0] *= 0.5
+#     # mod_y = np.full( (NH,), 0.5, np.float32)
+#     # mod_y[0] *= 0.5
+#     # inv_mod = mod_y[:,None,None]*mod_x[None,:,None]
+    
+#     out = np.zeros( (C,NH,NW), dtype=x.dtype)
+#     imm = imm.reshape(C, -1)
+#     for j in range(NH):
+#         krn = np.cos( (np.pi/NW) * (xoc+0.5) * xic) * \
+#               np.cos( (np.pi/NH) * (j  +0.5) * yic)
+#         #krn *= inv_mod        
+        
+#         np.matmul(imm, krn.reshape(NH*NW,NW), out=out[:,j,:])      
+    
+#     out /= ( max(H,NH)*max(W,NW) ) / 4.0
+#     print('max ', out.max())
+    
+    
+    
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+#     #out = out/H/W
+    
+#     #out /= 4
+#     #out /= 256
+    
+#     #out /= 4096
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+    
+    
+#     return out.transpose(1,2,0)
+
+
+# # def cosine_resize(x, size):
+# #     """HWC"""
+# #     x = x.transpose(2,0,1)
+# #     C,H,W = x.shape
+# #     NW, NH = size
+    
+    
+# #     xic = np.arange(W, dtype=np.float32)[None,:,None]
+# #     yic = np.arange(H, dtype=np.float32)[:,None,None]
+# #     xoc = np.arange(W, dtype=np.float32)[None,None,:]
+    
+# #     imm = np.empty( (C,H,W), dtype=x.dtype)
+    
+# #     x = x.reshape(C, -1)
+# #     for j in range(H):
+# #         krn = np.cos( (np.pi/W) * (xic+0.5) * xoc) * \
+# #               np.cos( (np.pi/H) * (yic+0.5) * j)
+                      
+# #         np.matmul(x, krn.reshape(H*W,W), out=imm[:,j,:])
+    
+    
+# #     imm[:,0,:] /= 2
+# #     imm[:,:,0] /= 2
+# #     imm /= 4
+    
+# #     #import code
+# #     #code.interact(local=dict(globals(), **locals()))
+    
+# #     xic = np.arange(W, dtype=np.float32)[None,:,None]
+# #     yic = np.arange(H, dtype=np.float32)[:,None,None]
+# #     xoc = np.arange(NW, dtype=np.float32)[None,None,:]
+    
+# #     # mod_x = np.full( (NW,), 0.5, np.float32)
+# #     # mod_x[0] *= 0.5
+# #     # mod_y = np.full( (NH,), 0.5, np.float32)
+# #     # mod_y[0] *= 0.5
+# #     # inv_mod = mod_y[:,None,None]*mod_x[None,:,None]
+    
+# #     out = np.zeros( (C,NH,NW), dtype=x.dtype)
+# #     imm = imm.reshape(C, -1)
+# #     for j in range(NH):
+# #         krn = np.cos( (np.pi/NW) * (xoc+0.5) * xic) * \
+# #               np.cos( (np.pi/NH) * (j  +0.5) * yic)
+# #         #krn *= inv_mod
+        
+        
+# #         np.matmul(imm, krn.reshape(H*W,NW), out=out[:,j,:])      
+    
+# #     #out /= ( max(H,NH)*max(W,NW) ) / 16.0
+# #     out /= ( H*W ) / 16.0
+# #     print('max ', out.max())
+    
+    
+    
+# #     #import code
+# #     #code.interact(local=dict(globals(), **locals()))
+# #     #out = out/H/W
+    
+# #     #out /= 4
+# #     #out /= 256
+    
+# #     #out /= 4096
+# #     #import code
+# #     #code.interact(local=dict(globals(), **locals()))
+    
+    
+# #     return out.transpose(1,2,0)
+# def checkerboard(shape):
+#     return np.indices(shape).sum(axis=0) % 2
+
+
+# img = img_def = FImage.from_file(r'D:\DevelopPython\test\00001.jpg').HWC()
+# img = img.astype(np.float32) / 255.0
+# #img = img[None,...].transpose(0,3,1,2) / 255.0
+# img = cv2.resize(img, (256,256))
+
+
+# #x = np.clip(x, 0, 1)
+
+# #x = idct_np(x[:,None,None,:,:], ps=64).transpose((1,2,0))
+# #import code
+# #code.interact(local=dict(globals(), **locals()))
+    
+    
+# # x = dct_np(img.transpose(2,0,1), ps=128, ops=64)
+# # def_shape = x.shape[:3]
+# #new_ps = 64
+# #x = idct_np(x, ps=new_ps).transpose((1,2,0))
+# #x /= new_ps
+
+# #img = checkerboard((128,128)).astype(np.float32)
+# #img = cv2.resize(img, (256,256), interpolation=cv2.INTER_NEAREST)[...,None]
+
+# for i in range(128, 0, -1):        
+#     x = cosine_resize(img, (i,i))
+#     x = np.clip(x, 0, 1)
+        
+    
+#     # ip = ImageProcessor( np.concatenate([cv2.resize(img, (i,i), interpolation=cv2.INTER_LANCZOS4), x ], axis=1) )
+#     # ip.fit_in(256,256, pad_to_target=True)
+#     # x = ip.get_image('HWC')
+    
+    
+
+#     # x = np.concatenate([img,x ], axis=1)
+#     # #cv2.imshow('', img)
+#     # #cv2.waitKey(0)
+#     cv2.imshow('', x)
+#     cv2.waitKey(0)
+
+
+
+
+
+
+# #from core.lib.image.aug.Geo import _gen_rw_coord_diff_grid
+# W=H=256
+
+# #dimg = lib_aug.cut_edges_mask(256, 256)
+        
+# dimg = FImage.from_file(Path(r'D:\DevelopPython\test\00000.png'))#.u8() #u8
+        
+# white = FImage.ones_like(dimg)
+# while True:
+#     with lib_time.timeit():
+#         #img = lib_gen.noise(1024,1024)
+#         #img = FImage( np.random.uniform(0, 1, (1024,1024,1)) )
+#         #img = lib_gen.circle_faded(256,256, 128, 128, 0, 128)
+#         #img = lib_gen.bicubic_noise(W,H, scale=16)
+#         #img = lib_aug.noise_clouds(W, H)
+#         #img = lib_gen.clouds(W,H)
+#         #img = lib_gen.binary_clouds(W,H)
+        
+#         #img = lib_gen.stripes(W,H, line_width=3,scales=[64,32])
+#         #img = lib_gen.binary_stripes(W,H, line_width=3,scales=[64,32])
+        
+#         #img = lib_aug.Geo().transform(dimg)
+        
+#         #img = lib_aug.levels(dimg)
+#         #img = dimg.blend(white,white,alpha=0.5)
+#         #img = dimg.hsv_shift(0.0, 0.0, -0.5)
+#         img = lib_aug.hsv_shift(dimg)
+
+#     cv2.imshow('', img.HWC())
+#     cv2.waitKey()
+
+# # # # import code
+# # # # code.interact(local=dict(globals(), **locals()))
+
+
+
+    
+# from core.lib.time import timeit
+
+# from collections import deque
+
+# d = deque()
+# for i in range(10000000):
+#     d.append(i)
+    
+# with timeit():
+#     d.rotate(-1)
+#     len(d)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+# import torch
+# import torch.amp
+# import torch.nn as nn
+# import torch.nn.functional as F
+
+# from core.lib import torch as lib_torch
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# import numpy as np
+# import cv2
+# from core.lib.image import aug as lib_aug
+# from core.lib.image import FImage
+# from core.lib.time import timeit
+
+
+# cached_occ = lib_aug.CachedOcc(max_count=3)
+
+# mask = FImage(np.zeros( (256,256,1), np.float32))
+# W=H=256
+# while True:
+#     for i in range(2):
+#         with timeit():
+#             occ, occ_mask = cached_occ.generate(mask, use_cached=i==1)
+        
+#         cv2.imshow('',occ.HWC() * occ_mask.HWC() )
+#         cv2.waitKey(0)
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import numpy as np
+# import torch
+# import torch.amp
+# import torch.nn as nn
+# import torch.nn.functional as F
+# from torch.optim import Adam
+
+# # x = torch.ones( (1,1,4,4), dtype=torch.float32)
+# # w = torch.rand( (1,1,3,3), dtype=torch.float32)
+
+# # a = F.conv2d(x, w, padding=1)
+# # s = F.conv_transpose2d(a, torch.linalg.inv(w), padding=1)
+
+# # x = torch.ones( (1,16), dtype=torch.float32)
+# # # tensor([[1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]])
+# # w = torch.rand( (1,16,1), dtype=torch.float32)
+
+# # a = x @ w
+# # # tensor([[[ 6.4282,  8.6944, 10.0617,  8.9046]]])
+# # s = a @ w.permute(0,2,1)
+# # # tensor([[[ 4.1919, 16.9669, 17.1571, 25.3909, 14.7524, 10.7094, 23.2761,
+# # #            12.7366, 19.9522, 13.2158, 29.0977, 19.3823, 20.5311, 20.1588,
+# # #            24.4339, 25.4915]]])
+
+
+# # #s = a @ w.permute(0,2,1)
+
+# class Mod(nn.Module):
+#     def __init__(self,):
+#         super().__init__()
+        
+#         self._fc1 = nn.Linear(16, 1, bias=False)
+#         self._fc2 = nn.Linear(1, 16, bias=False)
+        
+#     def forward(self, x):
+#         return self._fc1(x)
+                
+#     def inv_forward(self, x):
+#         return self._fc2(x)#x @ self._fc1.weight 
+
+# mod = Mod()
+
+# opt = Adam(mod.parameters(), lr=5e-5)
+
+# for _ in range(100000):
+    
+#     opt.zero_grad()
+    
+#     x = torch.rand( (256, 16 ), dtype=torch.float32)
+    
+#     x2 = mod.inv_forward(mod.forward(x))
+    
+#     loss_t = torch.square(x2-x).mean()
+#     print(loss_t.detach().cpu().numpy())
+#     loss_t.backward()
+    
+#     opt.step()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+"""
+-2 1
+
+4 3
+
+a b
+d e
+
+8 + 3  / 2   5.5
+
+
+a*d + b*e = x
+7
+
+a*d = x - b*e
+a = (x - b*e) / d
+b = (x - a*d) / e
+
+
+? ? ?
+
+1 1 1
+
+
+"""
+
+
+# import numpy as np
+# import cv2
+# from core.lib.image import aug as lib_aug
+# from core.lib.image import FImage
+
+
+# W = H = 256
+# while True:
+#     img = lib_aug.binary_stripes(W, H, line_width_range=[ int( max(W,H) * 0.0078125 ), int( max(W,H) * 0.03125 ) ])
+#     img = img + lib_aug.binary_clouds(W, H)
+#     img = img.apply(lambda x: np.where(x >= 1.0, 1.0, 0.0).astype(np.float32) )
+#     img = lib_aug.gaussian_blur(img)
+#     cv2.imshow('', img.HWC())
+#     cv2.waitKey(0) 
+    
+    
+#     # img = img.resize(W, H, interp=FImage.Interp.LANCZOS4)
+    
+#     # img = img.apply(lambda x: np.where(x >= 0.5, 1.0, 0.0).astype(np.float32) )
+    
+#     # #img[img >= 0.5] = 1.0
+#     # #img[img < 0.5] = 0.0
+#     # #img = img.apply(lambda x: x / x.max())
+    
+#     # #img = noise_clouds(256, 256)
+#     # cv2.imshow('', img.HWC())
+#     # cv2.waitKey(0)
+    
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+
+# def softmax(x, axis=None):
+#     """Compute softmax values for each sets of scores in x."""
+#     e_x = np.exp(x - np.max(x))
+#     return e_x / e_x.sum(axis=None) # only difference
+    
+# axis_size = 6
+
+# x = np.array([ 1000.0, 100.0, 0.0, 0, 0,0], np.float32)
+
+# y = x
+# y = softmax(x) #g_c_prob
+
+# x_lin = np.linspace(-1.0, 1.0, axis_size) # W
+# mu_x = np.sum(y * x_lin) 
+
+# #, dim=2) # B,NMAP
+# #coord_pt = coord_pt.view(1, 1, axis_size) # 1,1,W
+
+# inv_std = 1.0 / 0.1
+
+# mu_x = 0.2
+
+# g_x = np.exp(-np.sqrt(1e-4 + np.abs((mu_x - x_lin) * inv_std)))
+
+# #g_x = torch.unsqueeze(g_x, dim=2)
+
+# print(mu_x)
+# print(g_x)
+
+
+
+
+
+
+
+# import numpy as np
+# import torch
+# import torch.amp
+# import torch.nn as nn
+# import torch.nn.functional as F
+
+# x = torch.rand( (1,3,8,8), dtype=torch.float32)
+
+# #q = F.unfold( torch.rand( (1,3,8,8), dtype=torch.float32) , 3, 1, 1, 2)
+# y = F.interpolate(x, (6,6), mode='nearest')
+
+
+# N, C, K, K, OW, OH
+
+# from core.lib import fed 
+
+# from uuid import uuid4
+# import pickle
+
+# # #f = open(r'D:\new.bin', 'a+b')
+# # #f.write( bytes(9))
+# # # f.close()
+
+# # #f = File(r'D:\new.bin')
+
+# # import struct
+
+# # b = bytes(32)
+# # x=struct.unpack("16sQQ", b)
+
+# id = uuid4()
+
+
+# fed.write(r'D:\test.png', id, pickle.dumps({'asd':1}) )
+
+# print( pickle.loads(fed.read(r'D:\test.png', id)) )
+# from pathlib import Path
+# p = Path(r'D:\asd')
+
+# from typing import Sequence
+# s = '123'
+
+# q = isinstance(s, Sequence)
+
+
+# import uuid
+# q = uuid.uuid4()
+
+# uuid.UUID()
+
+# import pickle
+# from pathlib import Path
+# q=pickle.loads( Path(r'E:\showgit\show-1-base\text_encoder\pytorch_model-00001-of-00002.bin').read_bytes() )
+
+#import code
+#code.interact(local=dict(globals(), **locals()))
+
+
+# from core.lib.image import FImage
+# import numpy as np
+
+
+# d = FImage( np.zeros( (4,4,3), dtype=np.uint8) ).get_state(compressed=False)
+
+# q = FImage.from_state(d)
+
+# from core.lib.image import FImage
+# import numpy as np
+
+# x = FImage.from_file(Path(r'D:\test.png'))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# x = FImage( np.ones( (256,256,3), np.float32) )
+# x.f32().save(Path(r'D:\test.png'))
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# from core.lib import path as lib_path
+# import numpy as np
+# from core.lib.image import FImage
+# from core.lib import onnxruntime as lib_ort
+# from modelhub.onnx import YoloV5Face
+# import cv2
+
+# face_detector = YoloV5Face(lib_ort.get_best_device(YoloV5Face.get_available_devices()))
+
+
+# filepaths = lib_path.get_files_paths(r'G:\Imagenet')
+
+# for filepath in filepaths:
+    
+#     img = FImage.from_file(filepath)
+    
+    
+#     rects = face_detector.extract(img)
+#     print( len(rects) )
+
+# from core.lib.functools import cached_method, cache
+
+# b = 4
+# class A():
+#     def __init__(self, b):
+#         self._b = b
+    
+#     @cached_method
+#     def g(self, i : int = 4) -> str:
+#         return self._b
+    
+# a = A(4)
+
+# print( A.g.is_cached(a, ) )
+# print( a.g() )
+
+# q = a.g()
+
+
+# print( A.g.is_cached(a, ) )
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+#cached_method.is_cached()
+#inspect.getcallargs(a.g)['self']
+#a.g.__self__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# from core.lib import fed
+
+# fed.write(Path(r'D:\test.jpg'), {'asd':1})
+# d = fed.read(Path(r'D:\test.jpg'))
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# import numpy as np
+# from core.lib.image import FImage
+# import cv2
+# W = 224
+# H = 224
+
+# patch_size = 16
+# hpc = W // patch_size
+# vpc = H // patch_size
+
+# rnd_patch_dropout_per = 99
+
+# while True:
+#     dropout_mask = np.ones( (hpc*vpc,), dtype=np.float32)
+#     dropout_mask[: int( hpc*vpc * (rnd_patch_dropout_per / 100.0) ) ] = 0
+#     np.random.shuffle(dropout_mask)
+#     dropout_mask = FImage(dropout_mask.reshape( (hpc,vpc,1 )))
+#     dropout_mask = dropout_mask.resize(W, H, FImage.Interp.NEAREST)
+    
+#     q = dropout_mask.HWC()
+#     import code
+#     code.interact(local=dict(globals(), **locals()))
+
+#     cv2.imshow('', q)
+#     cv2.waitKey(0)
+
+# import numpy as np
+# from core.lib.time import timeit
+# from core.lib.image import FImage
+# import cv2
+# import tifffile
+# import pickle
+
+# # x = np.indices( (256,256,3), dtype=np.float32 ).sum(axis=0) % 2
+
+# # # cv2.imshow('', x)
+# # # cv2.waitKey(0)
+
+
+# # #x = np.clip(x*255.0, 0, 255).astype(np.uint8)
+# # x = np.clip(x*65535.0, 0, 65535).astype(np.uint16)
+
+# # #FImage(x).save(Path(r'D:\test.jpg'))
+# # #q=FImage.from_file(Path(r'D:\test.jpg')).HWC()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# # tifffile.imwrite(r'D:\test.tif', data=x, compression='jpeg', compressionargs={'level':100}, #'lossless':1, photometric='bgr',# 
+# #                  metadata={'qweqweqweq' :( (123,), (123,123) )    },
+# #                  )
+
+# # # with timeit():
+# # #     q = tifffile.imread(r'D:\test.tif')
+
+# with timeit():
+#     q = tifffile.TiffFile(r'D:\test.tif')
+
+# print(q.shaped_metadata)
+# w = q.asarray()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+# q.close()
+
+
+
+
+# def occlusion(mask : FImage, max_coverage=0.5):
+#     """Generate random occlusion and mask"""
+#     mask_np = mask.HWC()
+    
+#     mask_pix_count = len(np.argwhere(mask_np >= 0.5))
+#     H,W,_  = mask_np.shape
+#     while True:
+#         occ_mask = sum( Geo().transform( binary_stripes(W, H, line_width_range=[ int( max(W,H) * 0.0078125 ), int( max(W,H) * 0.03125 ) ],
+#                                          density_range=[0.15, 0.33]), center_fit=True, transform_intensity=0.0, deform_intensity=1.0, border=FImage.Border.REPLICATE)
+#                         for _ in range(1+nprnd.randint(4)) )
+#         occ_mask = occ_mask + binary_clouds(W, H)
+#         if np.random.randint(2) == 0:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, np.float32(1.0), np.float32(0.0)) )
+#         else:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, np.float32(0.0), np.float32(1.0)) )
+            
+#         occ_mask = gaussian_blur(occ_mask).HWC()
+        
+#         reduced_mask_np = mask_np * (1-occ_mask)
+#         if (len(np.argwhere(reduced_mask_np >= 0.5)) / mask_pix_count) <= max_coverage:
+#             # Don't hide more than max_coverage of mask
+#             continue
+        
+#         occ = sum( Geo(offset_transform_params = TransformParams(), transform_params = TransformParams() ).transform(motion_blur(gaussian_blur(levels(noise_clouds(W, H)))), W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, border=FImage.Border.REPLICATE)
+#                    *circle_faded_mask(W, H, cx_range=[0.0, 1.0], cy_range=[0.0, 1.0], f_range=[0.0, 1.0]) 
+#                     for _ in range(1+nprnd.randint(4)) )
+#         occ = occ.HWC()
+#         occ -= occ.min()
+#         occ /= occ.max()
+#         return FImage.from_numpy(occ), FImage.from_numpy(occ_mask)
+    
+
+# class CachedOcc:
+    
+#     #Thread-safe cached occlusions.
+#     #Generation random patterns and mask is expensive task.
+#     #The main idea is to generate them by one at a time, cache, and reuse already generated.
+    
+#     def __init__(self, max_count=1024):
+#         self._max_count = max_count
+#         self._lock = threading.Lock()
+#         self._cached = {}
+        
+#     def clear(self):
+#         self._cached = {}
+        
+#     def generate(self, mask, max_coverage=0.5, use_cached=False):
+#         """"""
+#         mask_np = mask.HWC()
+#         mask_pix_count = len(np.argwhere(mask_np >= 0.5))
+#         H,W,_  = mask_np.shape
+        
+#         cached = self._cached
+#         cached_key = (W,H)
+#         if (dataset := cached.get(cached_key, None)) is None:
+#             with self._lock:
+#                 if (dataset := cached.get(cached_key, None)) is None:
+#                     dataset = cached[cached_key] = []
+        
+#         check_func = lambda occ_mask: len(np.argwhere( mask_np * (1-occ_mask.HWC()) >= 0.5 ) ) >= max_coverage * mask_pix_count
+        
+#         if use_cached:                
+#             idxs = [*range(len(dataset))]
+#             np.random.shuffle(idxs)
+#             for idx in idxs:
+#                 occ, occ_mask = dataset[idx]
+#                 if check_func(occ_mask):
+#                     return occ, occ_mask
+                    
+#         # not use_cached or nothing acceptable in cached. 
+#         # Generate until acceptable.
+        
+#         for _ in itertools.count():
+#             occ, occ_mask = self._generate_pattern(H,W), self._generate_mask(H,W)
+            
+#             # Add to cached
+#             if len(dataset) >= self._max_count:
+#                 # Dataset is full, set at random place
+#                 dataset[random.randint(0, len(dataset)-1)] = (occ, occ_mask)
+#             else:
+#                 # Dataset is not full, extend
+#                 dataset.append( (occ, occ_mask) )
+            
+#             # Return if acceptable
+#             if check_func(occ_mask):
+#                 return occ, occ_mask
+  
+        
+#     @staticmethod
+#     def _generate_mask(H, W):
+#         """"""
+#         occ_mask = sum( Geo(offset_transform_params=TransformParams(), transform_params=TransformParams()).transform( binary_stripes(W, H, line_width_range=[ int( max(W,H) * 0.0078125 ), int( max(W,H) * 0.03125 ) ],
+#                                         density_range=[0.15, 0.33]) , W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, border=FImage.Border.REPLICATE)
+#                         for _ in range(1+nprnd.randint(4)) )
+#         occ_mask = occ_mask + binary_clouds(W, H)
+#         occ_mask = Geo(offset_transform_params=TransformParams(), transform_params=TransformParams()).transform(occ_mask, W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, interp=FImage.Interp.LINEAR, border=FImage.Border.REPLICATE)
+#         if np.random.randint(2) == 0:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, np.float32(1.0), np.float32(0.0)) )
+#         else:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, np.float32(0.0), np.float32(1.0)) )
+#         occ_mask = gaussian_blur(occ_mask)
+
+#         return occ_mask
+    
+#     @staticmethod
+#     def _generate_pattern(H, W):
+#         """"""
+#         occ = sum( Geo(offset_transform_params = TransformParams(), transform_params = TransformParams() ).transform(motion_blur(gaussian_blur(levels(noise_clouds(W, H)))), W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, border=FImage.Border.REPLICATE)
+#                    *circle_faded_mask(W, H, cx_range=[0.0, 1.0], cy_range=[0.0, 1.0], f_range=[0.0, 1.0]) 
+#                     for _ in range(1+nprnd.randint(4)) )
+        
+#         occ = occ.HWC()
+#         occ -= occ.min()
+#         occ /= occ.max()
+#         return FImage.from_numpy(occ)
+        
+# def occlusion(mask : FImage, max_coverage=0.5):
+#     """Generate random occlusion and mask"""
+#     mask_np = mask.HWC()
+    
+#     mask_pix_count = len(np.argwhere(mask_np >= 0.5))
+#     H,W,_  = mask_np.shape
+#     while True:
+        
+#         occ_mask = binary_stripes(W, H, line_width_range=[ int( max(W,H) * 0.0078125 ), int( max(W,H) * 0.03125 ) ], density_range=[0.15, 0.33])
+#         occ_mask = occ_mask + binary_clouds(W, H)
+#         occ_mask = Geo(offset_transform_params=TransformParams(), transform_params=TransformParams()).transform(occ_mask, W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, interp=FImage.Interp.LINEAR, border=FImage.Border.REPLICATE)
+#         if np.random.randint(2) == 0:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, 1.0, 0.0).astype(np.float32) )
+#         else:
+#             occ_mask = occ_mask.apply(lambda x: np.where(x >= 0.5, 0.0, 1.0).astype(np.float32) )
+            
+#         occ_mask = gaussian_blur(occ_mask).HWC()
+        
+#         if (len(np.argwhere( mask_np * (1-occ_mask)  >= 0.5)) / mask_pix_count) <= max_coverage:
+#             # Don't hide more than max_coverage of mask
+#             continue
+        
+#         #occ = sum( Geo(offset_transform_params = TransformParams(), transform_params = TransformParams() ).transform(motion_blur(gaussian_blur(levels(noise_clouds(W, H)))), W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, interp=FImage.Interp.CUBIC, border=FImage.Border.REPLICATE)
+#         #           *circle_faded_mask(W, H, cx_range=[0.0, 1.0], cy_range=[0.0, 1.0], f_range=[0.0, 1.0]) 
+#         #            for _ in range(1+nprnd.randint(3)) )
+#         #occ = motion_blur(gaussian_blur(levels(noise_clouds(W, H))))
+#         occ = Geo(offset_transform_params = TransformParams(), transform_params = TransformParams() ).transform(motion_blur(gaussian_blur(levels(noise_clouds(W, H)))), W, H, center_fit=True, transform_intensity=0.0, deform_intensity=1.0, interp=FImage.Interp.CUBIC, border=FImage.Border.REPLICATE)
+        
+#         occ = occ.HWC()
+#         occ -= occ.min()
+#         occ /= occ.max()
+        
+#         return FImage(occ), FImage(occ_mask)
+    
+
+
+def module_lambda(self, name : str, train : bool, func : Callable[ [nn.Module], Any ], net_grad=True) -> torch.Tensor:
+            with torch.set_grad_enabled(train):
+                model = self.model._mm.get_module(name, device=self.model._device, train=train)
+                if train:
+                    self.use_optimizer(name)
+
+                if not net_grad:
+                    params = [x for x in model.parameters() if x.requires_grad]
+                    for param in params:
+                        param.requires_grad_(False)
+
+                result = func(model)
+
+                if not net_grad:
+                    for param in params:
+                        param.requires_grad_(True)
+
+                return result
+                
+                
+                
+                
+                
+                
+# from pathlib import Path
+# from core.lib import clang
+
+# root = Path(__file__).parent
+# cpp_file = root  / 'minimal.cpp'
+# dll_file = root/ f'minimal.{clang.get_shared_lib_ext()}'
+
+
+
+# fut = clang.run(['-g0', '-O3', 
+#                  '-nostdlib', '-nodefaultlibs', '-nostdinc', '-nostdinc++',
+#                  '-fno-unwind-tables', '-fno-exceptions',
+#                  '-shared', 
+#                  '-e', '_dll_entry',
+#                  '-o', str(dll_file), 
+#                  f"-I{str(Path(clang.__file__).parent )}",
+#                  str(cpp_file),
+#                 ])
+                
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# fut = clang.run(['-g0', '-O3', 
+#                  '-fno-unwind-tables', '-fno-exceptions',
+#                  '-shared', 
+#                  '-o', str(dll_file), 
+#                  f"-I{str(Path(clang.__file__).parent )}",
+#                  str(cpp_file),
+#                 ])
+
+
+# @dll_import(dll_file)
+# def test() -> clang.float: 
+#     ...
+
+
+
+# zigcc.compile("""
+# extern "C" {
+
+# int test()
+# {
+#     return 1;
+# }
+
+# bool entry() { return 1; }
+# }
+ 
+
+# """)
+
+
+#from typing import get_type_hints
+# import inspect
+
+# import ctypes
+# from ctypes.util import find_library
+# from ctypes import (POINTER, WINFUNCTYPE, c_char_p, c_double, c_float, c_int8,
+#                     c_int16, c_int32, c_int64, c_size_t, c_ubyte, c_uint,
+#                     c_uint8, c_uint16, c_uint32, c_uint64, c_ulong, c_void_p,
+#                     c_wchar_p)
+
+# class FLOAT(c_float):
+#     def __eq__(self, other):
+#         if isinstance(other, self.__class__):
+#             return self.value == other.value
+#         else:
+#             return False
+#     def __ne__(self, other):
+#         return not(self == other)
+#     def __hash__(self):
+#         return self.value.__hash__()
+#     def __str__(self):
+#         return f'FLOAT ({self.value})'
+#     def __repr__(self):
+#         return self.__str__()
+    
+# dlls_by_name = {}
+
+# def dll_import(dll_name):
+#     """
+#     always annotate return type even if it is None !
+#     """
+
+#     dll = dlls_by_name.get(dll_name, None)
+#     if dll is None:
+#         try:
+#             dll = ctypes.cdll.LoadLibrary(find_library(dll_name))
+#         except:
+#             pass
+
+#         dlls_by_name[dll_name] = dll
+
+#     def decorator(func):
+#         if dll is not None:
+#             dll_func = getattr(dll, func.__name__)
+            
+#             anno = list(get_type_hints(func).values())
+            
+
+#             dll_func.argtypes = anno[:-1]
+#             dll_func.restype = anno[-1]
+#         else:
+#             dll_func = None
+
+#         def wrapper(*args):
+#             if dll_func is None:
+#                 raise RuntimeError(f'Unable to load {dll_name} library.')
+#             return dll_func(*args)
+#         return wrapper
+#     return decorator
+
+
+
+# class MyModule:
+#     ...
+#     @property
+#     def source_code(self) -> str:
+#         return r"""
+        
+
+# """
+
+
+#     def test(i : int) -> float:
+#         return """
+        
+#         """
+    
+# mod = MyModule()
+
+# print(test())
+
+
+
+
+
+
+
+# import os
+# from delphivcl import *
+
+# class ActivityIndicatorForm(Form):
+
+#     def __init__(self, owner):
+#         self.__create_comps()
+#         self.__config_comps()
+
+#     def __create_comps(self):
+#         self.od_styles = FileOpenDialog(self)
+#         self.mm_menu = MainMenu(self)
+#         self.mi_file = self.mm_menu.CreateMenuItem()
+#         self.mi_load_style = self.mm_menu.CreateMenuItem()
+#         self.mi_exit = self.mm_menu.CreateMenuItem()
+#         self.chk_animate = CheckBox(self)
+#         self.trk_frame_delay = TrackBar(self)
+#         self.lbl_frame_delay = Label(self)
+#         self.grp_indicator_type = RadioGroup(self)
+#         self.grp_indicator_size = RadioGroup(self)
+#         self.grp_indicator_color = RadioGroup(self)
+#         self.cbx_vcl_style = ComboBox(self)
+#         self.lbl_vcl_style = Label(self)
+#         self.ai = ActivityIndicator(self)
+#         self.cbx_form_color = ColorBox(self)
+#         self.lbl_form_color = Label(self)
+
+#     def __config_comps(self):
+#         self.caption = "Activity Indicator sample"
+#         self.SetProps(ClientHeight = 328, ClientWidth = 452, Position = "poScreenCenter", OnClose = self.__on_form_close)
+#         self.SetProps(Menu = self.mm_menu)
+#         #Configure the menu items
+#         self.mm_menu.Items.Insert(0, self.mi_file)
+#         self.mi_file.Insert(0, self.mi_load_style)
+#         self.mi_file.Insert(1, self.mi_exit)
+#         #Configure the menu items
+#         self.mi_file.SetProps(Caption = "File")
+#         self.mi_load_style.SetProps(Caption = "Load Styles...", OnClick = self.__on_load_style_click)
+#         self.mi_exit.SetProps(Caption = "Exit", OnClick = (lambda sender: Application.Terminate()))
+#         #Configure the FileOpenDialog
+#         self.od_styles.SetProps(Title = "Select the Vcl Styles directory", options = ["fdoPickFolders", "fdoPathMustExist", "fdoForceFileSystem"], OkButtonLabel = "Select")
+#         #Configure further components
+#         self.lbl_frame_delay.SetProps(Parent = self, Left = 245, Top = 55, Width = 88, Height = 15, Caption = 'Fame Delay (50)')
+#         self.lbl_vcl_style.SetProps(Parent = self, Left = 20, Top = 124, Width = 49, Height = 15, Alignment = "taRightJustify", Caption = 'VCL Style')
+#         self.lbl_form_color.SetProps(Parent = self, Left = 245, Top = 126, Width = 176, Height = 15, Caption = 'Form Color (Windows Style Only)')
+#         self.chk_animate.SetProps(Parent = self, Left = 254, Top = 20, Width = 96, Height = 17, Caption = 'Animate', TabOrder = 0, OnClick = self.__chk_animate_click)
+#         self.trk_frame_delay.SetProps(Parent = self, Left = 238, Top = 74, Width = 203, Height = 28, Max = 15, Min = 3, Position = 5, TabOrder = 1, OnChange = self.__trk_frame_delay_change)
+#         self.ai.SetProps(Parent = self, Left = 20, Top = 20)
+#         self.cbx_vcl_style.SetProps(Parent = self, Left = 20, Top = 145, Width = 197, Height = 23, Style = "csDropDownList", TabOrder = 2, OnChange = self.__cbx_vcl_style_change)
+#         self.cbx_form_color.SetProps(Parent = self, Left = 245, Top = 145, Width = 188, Height = 22, TabOrder = 3, OnChange = self.__cbx_form_color_change)
+
+#         self.grp_indicator_type.SetProps(Parent = self, Left = 20, Top = 193, Width = 145, Height = 117, Caption = 'Indicator Type', TabOrder = 4, OnClick = self.__grp_indicator_type_click)
+#         self.grp_indicator_type.Items.Add('aitMomentumDots')
+#         self.grp_indicator_type.Items.Add('aitRotatingSector')
+#         self.grp_indicator_type.Items.Add('aitSectorRing')
+#         self.grp_indicator_type.SetProps(ItemIndex = 0)
+
+#         self.grp_indicator_size.SetProps(Parent = self,  Left = 184, Top = 193, Width = 125, Height = 117, Caption = 'Indicator Size', TabOrder = 5, OnClick = self.__grp_indicator_size_click)
+#         self.grp_indicator_size.Items.Add('aisSmall')
+#         self.grp_indicator_size.Items.Add('aisMedium')
+#         self.grp_indicator_size.Items.Add('aisLarge')
+#         self.grp_indicator_size.Items.Add('aisXLarge')
+#         self.grp_indicator_size.SetProps(ItemIndex = 1)
+
+#         self.grp_indicator_color.SetProps(Parent = self, Left = 328, Top = 193, Width = 105, Height = 117, Caption = 'Indicator Color', TabOrder = 6, OnClick = self.__grp_indicator_color_click)
+#         self.grp_indicator_color.Items.Add('aicBlack')
+#         self.grp_indicator_color.Items.Add('aicWhite')
+#         self.grp_indicator_color.SetProps(ItemIndex = 0)
+
+#         self.__sm = StyleManager()
+#         for style_name in self.__sm.StyleNames:
+#             self.cbx_vcl_style.Items.Add(style_name)
+#         self.cbx_vcl_style.ItemIndex = self.cbx_vcl_style.Items.IndexOf(self.__sm.ActiveStyle.Name)
+
+#     def __on_form_close(self, sender, action):
+#         action.Value = caFree
+
+#     def __on_load_style_click(self, sender):
+#         if self.od_styles.Execute():
+#             for file in os.listdir(self.od_styles.FileName):
+#                 if file.endswith(".vsf"):
+#                     style_file_path = os.path.join(self.od_styles.FileName, file)
+#                     valid_style, style_info = self.__sm.IsValidStyle(style_file_path)
+#                     if valid_style and not (style_info.Name in self.cbx_vcl_style.Items):
+#                         self.__sm.LoadFromFile(style_file_path)
+
+#             self.cbx_vcl_style.Items.Clear()
+#             for style_name in self.__sm.StyleNames:
+#                 self.cbx_vcl_style.Items.Add(style_name)
+
+#         self.cbx_vcl_style.Sorted = True
+#         self.cbx_vcl_style.ItemIndex = self.cbx_vcl_style.Items.IndexOf(self.__sm.ActiveStyle.Name)
+#         self.BringToFront()
+
+#     def __chk_animate_click(self, sender):
+#         self.GetChildren(lambda x: print(x), None)
+        
+#         #import code
+#         #code.interact(local=dict(globals(), **locals()))
+
+#         self.ai.Animate = self.chk_animate.Checked
+
+#     def __trk_frame_delay_change(self, sender):
+#         self.ai.FrameDelay = self.trk_frame_delay.Position * 10
+#         self.lbl_frame_delay.Caption = f"Frame Delay ({self.ai.FrameDelay})"
+
+#     def __grp_indicator_type_click(self, sender):
+#         self.ai.IndicatorType = self.grp_indicator_type.Items[self.grp_indicator_type.ItemIndex]
+
+#     def __grp_indicator_size_click(self, sender):
+#         self.ai.IndicatorSize = self.grp_indicator_size.Items[self.grp_indicator_size.ItemIndex]
+
+#     def __grp_indicator_color_click(self, sender):
+#         self.ai.IndicatorColor = self.grp_indicator_color.Items[self.grp_indicator_color.ItemIndex]
+
+#     def __cbx_vcl_style_change(self, sender):
+#         self.__sm.SetStyle(self.cbx_vcl_style.Text)
+#         self.lbl_form_color.Enabled = StyleServices().IsSystemStyle
+#         self.cbx_form_color.Enabled = StyleServices().IsSystemStyle
+
+#     def __cbx_form_color_change(self, sender):
+#         self.Color = self.cbx_form_color.Selected
+
+# def main():
+#     Application.Initialize()
+#     Application.Title = "Activity Indicator"
+#     MainForm = ActivityIndicatorForm(Application)
+#     MainForm.Show()
+#     FreeConsole()
+#     Application.Run()
+#     MainForm.Destroy()
+
+# if __name__ == '__main__':
+#     main()
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+# import math
+
+
+
+# @nbexp.jitclass([ ('_x', nbt.float32),
+#                   ('_y', nbt.float32), ])
+# class Vec2:
+#     def __init__(self, x : float, y : float):
+#         self._x = x
+#         self._y = y
+
+#     @property
+#     def x(self) -> float: return self._x
+#     @property
+#     def y(self) -> float: return self._y
+    
+#     def __rmul__(self, other) -> Vec2: return Vec2(0,0)
+        
+# @nb.njit(nogil=True)
+# def run_test1():
+#     return 2 * Vec2(1,1) 
+
+# print( run_test1() )
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+# @nbexp.jitclass([ ('_x', nbt.float32),
+#                   ('_y', nbt.float32), ])
+# class Vec2:
+#     def __init__(self, x : float, y : float):
+#         self._x = x
+#         self._y = y
+
+#     @property
+#     def x(self) -> float: return self._x
+#     @property
+#     def y(self) -> float: return self._y
+    
+#     @property
+#     def length(self) -> float: return math.sqrt(self._x**2 + self._y**2)
+#     @property
+#     def cross(self) -> Vec2: return Vec2(self._y, -self._x)
+
+#     def normalize(self) -> Vec2:
+#         if (d := self.length) != 0:
+#             return Vec2(self._x / d, self._y / d)
+#         return self
+    
+#     ### OVERLOADED METHODS
+    
+#     def __mul__(self, other) -> Vec2: return Vec2(0,0) 
+#     def __rmul__(self, other) -> Vec2: return Vec2(0,0)
+    
+    
+    
+#     def __len__(self): return 2
+#     def __getitem__(self, key): return (self._x, self._y)[key]
+
+
+#     #def __repr__(self): return self.__str__()
+#     def __str__(self): return f'Vec2 [{self._x}, {self._y}]'
+
+    
+    
+# # # Overload implementations
+# # def Vec2__mul__Vec2(self, other):   return Vec2(self._x*other._x, self._y*other._y)
+# # def Vec2__mul__number(self, other): return Vec2(self._x*float(other), self._y*float(other))
+# # def Vec2__rmul__Vec2(self, other):   return Vec2(other._x*self._x, other._y*self._y)
+# # def Vec2__rmul__number(self, other): return Vec2(float(other)*self._x, float(other)*self._y)
+
+    
+# # # Overloaders
+# # @nbex.overload_method(nbt.misc.ClassInstanceType, "__mul__")
+# # def over_Vec2__mul__(self, other):
+# #     print('over_Vec2__mul__', self, other)
+# #     if self is Vec2.class_type.instance_type:
+# #         if other is Vec2.class_type.instance_type: return Vec2__mul__Vec2
+# #         if other in nbt.number_domain: return Vec2__mul__number
+        
+# # @nbex.overload_method(nbt.misc.ClassInstanceType, "__rmul__")
+# # def over_Vec2__rmul__(self, other):
+# #     print('over_Vec2__rmul__', self, other)
+# #     if self is Vec2.class_type.instance_type:
+# #         if other is Vec2.class_type.instance_type: return Vec2__rmul__Vec2
+# #         if other in nbt.number_domain: return Vec2__rmul__number
+        
+# # Tests
+
+# #@nb.njit(nogil=True)
+# def run_test1():
+#     return 2 * Vec2(1,1) 
+
+# @nb.njit(nogil=True)
+# def run_test2():
+#     return Vec2(1,1) * Vec2(3,3)
+
+# print( run_test1() ) # outputs 2.0
+# #print( run_test2().x ) # outputs 3.0
+
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+# from core.lib.torch.utils import RFA
+
+
+# x = (RFA.create((5,), k_list = (3,5,7,9), s_list = (2,) )
+#         .filter(lambda rfs, cfg: cfg if (cfg[0].kernel_size != 1 ) else None ) )
+
+# x.print()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# rfa.print()
+
+# rfa.filter(lambda rfs, cfg: cfg if cfg[0].kernel_size != 1 else None ).print()
+# rfa.filter(lambda rfs, cfg: cfg if cfg[0].kernel_size != 1 else None ).nearest(100)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+# from core.lib import ffmpeg
+# # #x = ffmpeg.VideoSource.open("F:\\muzikaliti.mp4")
+# # #x = ffmpeg.VideoSource.open("F:\\galkine.mp4")
+# # #x = ffmpeg.VideoSource.open("F:\\test.mp4")
+# x = ffmpeg.VideoSource.open(f"E:\\Torrents\\6.Underground.2019.WEBRip.2160p.HDR.seleZen.mkv")
+# x.get_frame(0)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+# import itertools
+# import cv2
+
+# print('x.frame_count', x.frame_count)
+# n = 0
+# for i in range(x.frame_count-100, x.frame_count):
+#     image = x.get_frame(i)
+#     if image is None:
+#         break
+
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+#     print(i)
+#     cv2.imshow('', image.HWC())
+#     cv2.waitKey(0)
+
+#     n += 1
+
+# x.dispose()
+# print('counted frames', n)
+
+# #q.read(3)
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+
+
+
+
+
+# from core.lib import path as lib_path
+# from core.lib.image import FImage
+# from pathlib import Path
+
+# import numpy as np
+
+# outdirpath = Path(r'D:\\DevelopPPP\\projects\\DeepXTools\\data\\generic_fixed')
+# outdirpath.mkdir(exist_ok=True)
+
+# imagespaths = lib_path.get_files_paths(r'D:\\DevelopPPP\\projects\\DeepXTools\\data\\generic')
+
+# imagepath_by_stem = { x.stem : x for x in imagespaths }
+
+# for maskpath in lib_path.get_files_paths(r'D:\\DevelopPPP\\projects\\DeepXTools\\data\\generic_fill_noise'):
+    
+#     imagepath = imagepath_by_stem[maskpath.stem]
+    
+#     img = FImage.from_file(imagepath).HWC()
+#     H,W,C = img.shape
+    
+#     mask = FImage.from_file(maskpath).HWC()
+    
+#     noise= np.random.uniform(0.0, 255.0, (H,W,C)).astype(np.uint8)
+    
+#     out_img = img*(1-mask) + noise*mask
+    
+#     FImage(out_img).save( outdirpath / (imagepath.name), quality=100)
+
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+
+        # import cv2
+        # z = def_img.u8().HWC()
+        # for l_, t_, r_, b_ in zip(l,t,r,b):
+        #     z = cv2.rectangle(z, (int(l_), int(t_)), (int(r_), int(b_)), (0,255,0))
+        #     print('# = ', (r_-l_)*(b_-t_) )
+        
+        # cv2.imshow('', FImage(z).resize( W//2, H//2 ).HWC() )
+        # cv2.waitKey(0)
+        # print('  ')
+        
+        # # import code
+        # # code.interact(local=dict(globals(), **locals()))
+        
+        #keep = lib_math.nms_confluence(l,t,r,b, score, confluence_thr=0.5)#, 0.5)
+        #import code
+        #code.interact(local=dict(globals(), **locals()))
+        
+        
+        
+        # import cv2
+        # z = def_img.u8().HWC()
+        # for l_, t_, r_, b_ in zip(l,t,r,b):
+        #     print('# = ', (r_-l_)*(b_-t_) )
+            
+        #     z = cv2.rectangle(z, (int(l_), int(t_)), (int(r_), int(b_)), (0,255,0))
+        # cv2.imshow('', FImage(z).resize( W//2, H//2 ).HWC() )
+        # cv2.waitKey(0)
+        
+        # score = score[keep]
+        # keep = lib_math.nms(l,t,r,b, score, 0.5)
+        # l, t, r, b = l[keep], t[keep], r[keep], b[keep]

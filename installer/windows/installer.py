@@ -450,10 +450,10 @@ fr'''{{
 	}}
 }}
 ''')
-        subprocess.Popen(args='bin\code.cmd --disable-workspace-trust --install-extension ms-python.python', cwd=self._vscode_path, shell=True, env=self._env).wait()
-        subprocess.Popen(args='bin\code.cmd --disable-workspace-trust --install-extension ms-python.vscode-pylance', cwd=self._vscode_path, shell=True, env=self._env).wait()
-        subprocess.Popen(args='bin\code.cmd --disable-workspace-trust --install-extension ms-python.isort', cwd=self._vscode_path, shell=True, env=self._env).wait()
-        subprocess.Popen(args='bin\code.cmd --disable-workspace-trust --install-extension searking.preview-vscode', cwd=self._vscode_path, shell=True, env=self._env).wait()
+        subprocess.Popen(args=r'bin\code.cmd --disable-workspace-trust --install-extension ms-python.python', cwd=self._vscode_path, shell=True, env=self._env).wait()
+        subprocess.Popen(args=r'bin\code.cmd --disable-workspace-trust --install-extension ms-python.vscode-pylance', cwd=self._vscode_path, shell=True, env=self._env).wait()
+        subprocess.Popen(args=r'bin\code.cmd --disable-workspace-trust --install-extension ms-python.isort', cwd=self._vscode_path, shell=True, env=self._env).wait()
+        subprocess.Popen(args=r'bin\code.cmd --disable-workspace-trust --install-extension searking.preview-vscode', cwd=self._vscode_path, shell=True, env=self._env).wait()
 
         # Create VSCode user settings
         vscode_user_settings = self._vscode_path / 'data' / 'user-data' / 'User' / 'settings.json'

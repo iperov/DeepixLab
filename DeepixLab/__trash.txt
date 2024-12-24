@@ -1,4 +1,6 @@
 
+
+
 # from core import ax
 
 # import numpy as np
@@ -79,15 +81,13 @@
 #     # head_no_wf_hair_img = FImage.from_numpy(head_no_wf_hair_img_np)
 #     # head_no_wf_hair_img.save(head_no_wf_hair_out_path)
     
-#     skin_depth_np = FImage.from_file(skin_depth_path).f32().HWC()    
-#     skin_normal_np = FImage.from_file(skin_normal_path).f32().HWC()    
+#     #skin_depth_np = FImage.from_file(skin_depth_path).f32().HWC()    
+#     #skin_normal_np = FImage.from_file(skin_normal_path).f32().HWC()    
 #     skin_wf_mask_np = FImage.from_file(skin_wf_mask_path).f32().HWC()
 #     skin_em_mask_np = FImage.from_file(skin_em_mask_path).f32().HWC()    
     
-#     occlusion_mask_np = FImage.from_file(occlusion_mask_path).f32().HWC()    
-#     occlusion_unmask_np = (1.0 - occlusion_mask_np)
-    
-    
+#     #occlusion_mask_np = FImage.from_file(occlusion_mask_path).f32().HWC()    
+#     #occlusion_unmask_np = (1.0 - occlusion_mask_np)
     
 #     # WH = max(hair_mask_img_np.shape[0:2])
 #     # size = (int(WH / 64) & ~1) + 1
@@ -102,8 +102,9 @@
 #     # hair_mask_blur_img_np = cv2.GaussianBlur(hair_mask_blur_img_np, (0,0), (WH / 256) )
     
     
-#     # #all_occlusion_unmask_np = occlusion_unmask_np * (1-hair_mask_blur_img_np[...,None])
-#     all_occlusion_unmask_np = occlusion_unmask_np * (1-hair_mask_img_np)
+#     #all_occlusion_unmask_np = occlusion_unmask_np * (1-hair_mask_blur_img_np[...,None])
+#     hair_unmask_np = 1-hair_mask_img_np
+    
 #     # while True:
 #     #     cv2.imshow('', hair_mask_img_np)
 #     #     cv2.waitKey(0)
@@ -119,27 +120,27 @@
 #     # shutil.copy(skin_wf_mask_path, skin_wf_mask_out_path)
     
 #     skin_wf_no_occ_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
-#     FImage.from_numpy(skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_mask_out_path)
+#     FImage.from_numpy(skin_wf_mask_np*hair_unmask_np).save(skin_wf_no_occ_mask_out_path)
     
 #     # skin_em_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
 #     # shutil.copy(skin_em_mask_path, skin_em_mask_out_path)
     
 #     skin_em_no_occ_mask_out_path.parent.mkdir(parents=True, exist_ok=True)
-#     FImage.from_numpy(skin_em_mask_np*all_occlusion_unmask_np).save(skin_em_no_occ_mask_out_path)
+#     FImage.from_numpy(skin_em_mask_np*hair_unmask_np).save(skin_em_no_occ_mask_out_path)
     
     
 #     # skin_wf_depth_out_path.parent.mkdir(parents=True, exist_ok=True)
 #     # FImage.from_numpy(skin_depth_np*skin_wf_mask_np).save(skin_wf_depth_out_path)
     
-#     skin_wf_no_occ_depth_out_path.parent.mkdir(parents=True, exist_ok=True)
-#     FImage.from_numpy(skin_depth_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_depth_out_path)
+#     # skin_wf_no_occ_depth_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # FImage.from_numpy(skin_depth_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_depth_out_path)
     
     
 #     # skin_wf_normal_out_path.parent.mkdir(parents=True, exist_ok=True)
 #     # FImage.from_numpy(skin_normal_np*skin_wf_mask_np).save(skin_wf_normal_out_path)
     
-#     skin_wf_no_occ_normal_out_path.parent.mkdir(parents=True, exist_ok=True)
-#     FImage.from_numpy(skin_normal_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_normal_out_path)
+#     # skin_wf_no_occ_normal_out_path.parent.mkdir(parents=True, exist_ok=True)
+#     # FImage.from_numpy(skin_normal_np*skin_wf_mask_np*all_occlusion_unmask_np).save(skin_wf_no_occ_normal_out_path)
     
      
     
@@ -160,7 +161,7 @@
 # @ax.task
 # def main_task():    
 #     root = Path(r'E:\Datasets\SSHG_def')
-#     root_out = Path(r'D:\Datasets\SSHG_test')
+#     root_out = Path(r'D:\Datasets\SSHG_out')
     
 #     try:
 #         shutil.rmtree(root_out)
@@ -177,6 +178,50 @@
 #             yield ax.sleep(0)
 
 # main_task().wait()
+# import code
+# code.interact(local=dict(globals(), **locals()))
+
+
+
+
+# import time
+# import threading
+# import torch
+# import torch.functional as F
+
+# class timeit:
+#     def __init__(self, msg : str = None):
+#         self._msg = msg if msg is not None else ''
+#     def __enter__(self):
+#         self.t = time.perf_counter()
+#     def __exit__(self, a,b,c):
+#         print(f'Time of {self._msg}: {time.perf_counter()-self.t}')
+
+
+# def thread_proc():
+#     #inp_t = torch.zeros( (64,3,256*256), dtype=torch.float32, device='cuda')
+    
+#     inp_t = torch.zeros( (64,3*256*256), dtype=torch.float32, device='cuda')
+    
+#     kernel_t = torch.zeros( (3*256*256, 512), dtype=torch.float32, device='cuda')
+#     kernel_inv_t = torch.zeros( (512, 3*256*256), dtype=torch.float32, device='cuda')
+    
+#     #import code
+#     #code.interact(local=dict(globals(), **locals()))
+    
+#     def do():
+#         inp_t @ kernel_t @ kernel_inv_t
+    
+#     while True:
+#         #with timeit():
+#         #    for _ in range(10):
+#         #        do()
+#         do()
+#         time.sleep(0.002)
+    
+# t = threading.Thread(target=thread_proc, daemon=True )
+# t.start()
+
 # import code
 # code.interact(local=dict(globals(), **locals()))
 

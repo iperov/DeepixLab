@@ -550,7 +550,7 @@ def install_deepixlab(release_dir, cache_dir, python_ver='3.12.8', backend='cuda
     builder.create_run_python_script('FacesetMaker.bat',    f'{repo_dir_name}\\DeepixLab\\main.py', 'run FacesetMaker --ui-data-dir "%~dp0_internal"')
     builder.create_run_python_script('DatasetEditor.bat',   f'{repo_dir_name}\\DeepixLab\\main.py', 'run DatasetEditor --ui-data-dir "%~dp0_internal"')
     builder.create_run_python_script('DeepCat.bat',         f'{repo_dir_name}\\DeepixLab\\main.py', 'run DeepCat --ui-data-dir "%~dp0_internal"')
-    #builder.create_run_python_script('DeepSwap.bat',        f'{repo_dir_name}\\DeepixLab\\main.py', 'run DeepSwap --ui-data-dir "%~dp0_internal"')
+    builder.create_run_python_script('DeepSwap.bat',        f'{repo_dir_name}\\DeepixLab\\main.py', 'run DeepSwap --ui-data-dir "%~dp0_internal"')
 
     builder.install_vscode(folders=[f'{repo_dir_name}/DeepixLab',f'{repo_dir_name}'])
 

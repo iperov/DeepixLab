@@ -19,23 +19,15 @@ class QxExport(qx.QVBox):
                     .add(qx.QLabel().set_text('@(Input_directory)'), align=qx.Align.RightF)
                     .add(qx.QMxPathState(export.mx_input_path))
                 .next_row()
-                    .add(qx.QLabel().set_text('@(Output_directory)'), align=qx.Align.RightF)
-                    .add(qx.QMxPathState(export.mx_output_path))
+                    .add(qx.QLabel().set_text('@(Output_directory) SWAP'), align=qx.Align.RightF)
+                    .add(qx.QMxPathState(export.mx_output_swap_path))
                 .next_row()
-                    .add(qx.QLabel().set_text('@(Patch_mode)'), align=qx.Align.RightF)
-                    .add( qx.QHBox()
-                            .add(qx.QCheckBoxMxFlag(export.mx_patch_mode))
-                            .add(patch_mode_holder := qx.QHBox() ), align=qx.Align.LeftF)
-
+                    .add(qx.QLabel().set_text('@(Output_directory) SWAP_GUIDE'), align=qx.Align.RightF)
+                    .add(qx.QMxPathState(export.mx_output_swap_guide_path))
                 .next_row()
-                    .add(qx.QLabel().set_text('@(Levels_range)'), align=qx.Align.RightF)
-                    .add( qx.QHBox()
-                            .add(qx.QDoubleSpinBoxMxNumber(export.mx_levels_min))
-                            .add(qx.QLabel().set_text('-'))
-                            .add(qx.QDoubleSpinBoxMxNumber(export.mx_levels_max))
-                            
-                        , align=qx.Align.LeftF)
-                            
+                    .add(qx.QLabel().set_text('@(Output_directory) REC_GUIDE'), align=qx.Align.RightF)
+                    .add(qx.QMxPathState(export.mx_output_rec_guide_path))
+                    
                 .next_row()
                     .add(qx.QLabel().set_text('@(File_format)'), align=qx.Align.RightF)
                     .add( QxImageFormat(export.mx_image_format), col_span=2, align=qx.Align.LeftF)
@@ -62,17 +54,3 @@ class QxExport(qx.QVBox):
             (export_btn.show(),
              cancel_btn.hide())
         ).dispose_with(self)
-
-        export.mx_patch_mode.reflect(lambda patch_mode, bag=mx.Disposable().dispose_with(self):
-                                     self._ref_patch_mode(patch_mode, patch_mode_holder, bag))
-
-
-    def _ref_patch_mode(self, patch_mode, holder : qx.QHBox, bag : mx.Disposable):
-        bag.dispose_items()
-        if patch_mode:
-            holder.add( qx.QHBox().dispose_with(bag)
-                            .add(qx.QLabel().set_text('@(Sample_count)'))
-                            .add(qx.QDoubleSpinBoxMxNumber(self._export.mx_sample_count))
-                            .add_spacer(4)
-                            .add(qx.QCheckBoxMxFlag(self._export.mx_fix_borders).set_text('@(Fix_borders)'))
-                            )

@@ -35,7 +35,7 @@ class QxManager(qx.QVBox):
                                     .add(qx.QHeaderVBox().set_text('SRC @(Data_generator)').inline(lambda c: c.content_vbox.add(QxDataGenerator(self._mgr.mx_src_data_generator))).v_compact())
                                     .add(qx.QHeaderVBox().set_text('DST @(Data_generator)').inline(lambda c: c.content_vbox.add(QxDataGenerator(self._mgr.mx_dst_data_generator))).v_compact())
                                     .add(qx.QHeaderVBox().set_text('@(Model)').inline(lambda c: c.content_vbox.add(QxModel(self._mgr.mx_model))).v_compact())
-                                    #.add(qx.QHeaderVBox().set_text('@(Export)').inline(lambda c: c.content_vbox.add(QxExport(self._mgr.mx_export))).v_compact())
+                                    .add(qx.QHeaderVBox().set_text('@(Export)').inline(lambda c: c.content_vbox.add(QxExport(self._mgr.mx_export))).v_compact())
                                     .add(qx.QWidget()))))
 
                     .add(qx.QSplitter().set_orientation(qx.Orientation.Vertical)

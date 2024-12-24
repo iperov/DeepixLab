@@ -71,7 +71,7 @@ class MxManager(mx.Disposable):
         self._mx_model           = MxModel( state=state.get('model', None)).dispose_with(disp_bag)
         self._mx_model_trainer  = MxModelTrainer(self._mx_src_data_generator, self._mx_dst_data_generator, self._mx_model, state=state.get('model_trainer', None)).dispose_with(disp_bag)
         self._mx_preview        = MxPreview(self._mx_src_data_generator, self._mx_dst_data_generator, self._mx_model, state=state.get('preview', None)).dispose_with(disp_bag)
-        #self._mx_export         = MxExport(self._mx_model, state=state.get('export', None)).dispose_with(disp_bag)
+        self._mx_export         = MxExport(self._mx_model, state=state.get('export', None)).dispose_with(disp_bag)
     
     @ax.task
     def _get_state(self) -> FDict:
@@ -87,5 +87,5 @@ class MxManager(mx.Disposable):
                       'model' : model_t.result,
                       'model_trainer' : self._mx_model_trainer.get_state(),
                       'preview' : self._mx_preview.get_state(),
-                      #'export' : self._mx_export.get_state(),
+                      'export' : self._mx_export.get_state(),
                      })

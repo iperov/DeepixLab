@@ -38,26 +38,30 @@ class MxExport(mx.Disposable):
         self._mx_error = mx.TextEmitter().dispose_with(self)
         self._mx_progress = mx.Progress().dispose_with(self)
         self._mx_input_path  = mx.Path(config=mx.Path.Config(dir=True), on_open=self._on_input_path_open).dispose_with(self)
-        self._mx_output_path = mx.Path(config=mx.Path.Config(dir=True, allow_open=False, allow_new=True)).dispose_with(self)
+        self._mx_output_swap_path = mx.Path(config=mx.Path.Config(dir=True, allow_open=False, allow_new=True)).dispose_with(self)
+        self._mx_output_swap_guide_path = mx.Path(config=mx.Path.Config(dir=True, allow_open=False, allow_new=True)).dispose_with(self)
+        self._mx_output_rec_guide_path = mx.Path(config=mx.Path.Config(dir=True, allow_open=False, allow_new=True)).dispose_with(self)
 
-        self._mx_patch_mode = mx.Flag(state.get('patch_mode', False)).dispose_with(self)
-        self._mx_sample_count = mx.Number(state.get('sample_count', 2), mx.Number.Config(min=1, max=4)).dispose_with(self)
-        self._mx_fix_borders = mx.Flag(state.get('fix_borders', False)).dispose_with(self)
         self._mx_image_format = MxImageFormat(default_format_type=ImageFormatType.PNG, state=state.get('image_format_state', None)).dispose_with(self)
 
         self._mx_delete_output_directory = mx.Flag(state.get('delete_output_directory', True)).dispose_with(self)
 
         if (input_path := state.get('input_path', None)) is not None:
             self._mx_input_path.open(input_path)
-        if (output_image_path := state.get('output_image_path', None)) is not None:
-            self._mx_output_path.new(output_image_path)
+        if (output_swap_path := state.get('output_swap_path', None)) is not None:
+            self._mx_output_swap_path.new(output_swap_path)
+        if (output_swap_guide_path := state.get('output_swap_guide_path', None)) is not None:
+            self._mx_output_swap_guide_path.new(output_swap_guide_path)
+        if (output_rec_guide_path := state.get('output_rec_guide_path', None)) is not None:
+            self._mx_output_rec_guide_path.new(output_rec_guide_path)
+
 
     def get_state(self) -> FDict:
         return FDict({  'input_path' : self._mx_input_path.get(),
-                        'output_path' : self._mx_output_path.get(),
-                        'patch_mode' : self._mx_patch_mode.get(),
-                        'sample_count' : self._mx_sample_count.get(),
-                        'fix_borders' : self._mx_fix_borders.get(),
+                        'output_swap_path'       : self._mx_output_swap_path.get(),
+                        'output_swap_guide_path' : self._mx_output_swap_guide_path.get(),
+                        'output_rec_guide_path'  : self._mx_output_rec_guide_path.get(),
+                        
                         'image_format_state' : self._mx_image_format.get_state(),
                         'delete_output_directory' : self._mx_delete_output_directory.get(),
                         })
@@ -71,22 +75,21 @@ class MxExport(mx.Disposable):
     @property
     def mx_input_path(self) -> mx.IPath_v: return self._mx_input_path
     @property
-    def mx_output_path(self) -> mx.IPath_v: return self._mx_output_path
+    def mx_output_swap_path(self) -> mx.IPath_v: return self._mx_output_swap_path
     @property
-    def mx_patch_mode(self) -> mx.IFlag_v: return self._mx_patch_mode
+    def mx_output_swap_guide_path(self) -> mx.IPath_v: return self._mx_output_swap_guide_path
     @property
-    def mx_sample_count(self) -> mx.INumber_v: return self._mx_sample_count
-    @property
-    def mx_fix_borders(self) -> mx.IFlag_v: return self._mx_fix_borders
+    def mx_output_rec_guide_path(self) -> mx.IPath_v: return self._mx_output_rec_guide_path
+    
     @property
     def mx_image_format(self) -> MxImageFormat: return self._mx_image_format
-    @property
-    def mx_fix_borders(self) -> mx.IFlag_v: return self._mx_fix_borders
     @property
     def mx_delete_output_directory(self) -> mx.IFlag_v: return self._mx_delete_output_directory
 
     def _on_input_path_open(self, path : Path):
-        self._mx_output_path.new( path / 'dc' )
+        self._mx_output_swap_path.new( path / 'swap' )
+        self._mx_output_swap_guide_path.new( path / 'swap_guide' )
+        self._mx_output_rec_guide_path.new( path / 'rec_guide' )
         return path
 
 
@@ -113,22 +116,39 @@ class MxExport(mx.Disposable):
         yield ax.switch_to(self._main_thread)
 
         if (input_path  := self._mx_input_path.get()) is None or \
-           (output_path := self._mx_output_path.get()) is None:
+           (output_swap_path := self._mx_output_swap_path.get()) is None or \
+           (output_swap_guide_path := self._mx_output_swap_guide_path.get()) is None or \
+           (output_rec_guide_path := self._mx_output_rec_guide_path.get()) is None:
             yield ax.cancel()
-
+      
         yield ax.switch_to(self._export_thread)
         yield ax.attach_to(self._export_fg, cancel_all=True)
 
         err = None
-        if self._mx_delete_output_directory.get() and output_path.exists():
-            try:
-                shutil.rmtree(output_path)
-            except Exception as e:
-                err = e
-
+        if self._mx_delete_output_directory.get():
+            if output_swap_path.exists():
+                try:
+                    shutil.rmtree(output_swap_path)
+                except Exception as e:
+                    err = e
+            
+            if output_swap_guide_path.exists():
+                try:
+                    shutil.rmtree(output_swap_guide_path)
+                except Exception as e:
+                    err = e
+        
+            if output_rec_guide_path.exists():
+                try:
+                    shutil.rmtree(output_rec_guide_path)
+                except Exception as e:
+                    err = e
+                    
         if err is None:
             try:
-                output_path.mkdir(parents=True, exist_ok=True)
+                output_swap_path.mkdir(parents=True, exist_ok=True)
+                output_swap_guide_path.mkdir(parents=True, exist_ok=True)
+                output_rec_guide_path.mkdir(parents=True, exist_ok=True)
                 image_paths = lib_path.get_files_paths(input_path, extensions=ImageFormatSuffixes)
             except Exception as e:
                 err=e
@@ -138,7 +158,7 @@ class MxExport(mx.Disposable):
             self._mx_progress.start().set(0, len(image_paths))
 
             if err is None:
-                for value in  ax.FutureGenerator( ( ( self._infer_path(image_path, output_path), image_path )
+                for value in  ax.FutureGenerator( ( ( self._infer_path(image_path, output_swap_path, output_swap_guide_path, output_rec_guide_path), image_path )
                                                     for image_path in image_paths),
                                                     max_parallel=self._export_thread_pool.count*2, max_buffer=self._export_thread_pool.count*2, ):
                     if value is not None:
@@ -161,15 +181,12 @@ class MxExport(mx.Disposable):
             self._mx_error.emit(str(err))
 
     @ax.task
-    def _infer_path(self, image_path : Path, output_root : Path) -> FImage:
+    def _infer_path(self, image_path : Path, output_swap_path : Path, output_swap_guide_path : Path, output_rec_guide_path : Path) -> FImage:
         yield ax.attach_to(self._fg, detach_parent=False)
         yield ax.switch_to(self._main_thread)
 
         model = self._model
-        H, W, _, _ = model.shape
-        patch_mode = self._mx_patch_mode.get()
-        sample_count = self._mx_sample_count.get()
-        fix_borders = self._mx_fix_borders.get()
+        H, W, _ = model.input_shape
 
         yield ax.switch_to(self._export_thread_pool)
 
@@ -180,48 +197,37 @@ class MxExport(mx.Disposable):
             err = e
 
         if err is None:
-            if patch_mode:
-                if image.width >= W and image.height >= H:
-
-                    patcher = Patcher(image, W, H, sample_count=sample_count, use_padding=fix_borders)
-
-                    for i in range(patcher.patch_count):
-                        yield ax.wait(fut := model.process(MxModel.Job( inputs=MxModel.Job.Inputs(input_image=[patcher.get_patch(i)]),
-                                                                        outputs=MxModel.Job.Outputs(output_image=True))))
-                        if fut.succeeded:
-                            if (result_outputs := fut.result.result.outputs) is not None:
-                                patcher.merge_patch(i, result_outputs.output_image[0] )
-                            else:
-                                err = Exception()
-                        else:
-                            err = fut.error
-                            break
-
-                    if err is None:
-                        output_image = patcher.get_merged_image()
-                else:
-                    err = Exception(f'{image_path} : Image size is less than model resolution')
-            else:
-                yield ax.wait(fut := model.process(MxModel.Job(inputs=MxModel.Job.Inputs(input_image=[image.resize(W, H, interp=FImage.Interp.LANCZOS4)]),
-                                                                    outputs=MxModel.Job.Outputs(output_image=True))))
-                if fut.succeeded:
-                    if (result_outputs := fut.result.result.outputs) is not None:
-                        output_image = result_outputs.output_image[0]
+        
+            yield ax.wait(fut := model.process(MxModel.Job(inputs=MxModel.Job.Inputs(dst_input_image=[image.resize(W, H, interp=FImage.Interp.LANCZOS4)]),
+                                                                outputs=MxModel.Job.Outputs(pred_dst_guide=True,
+                                                                                            pred_swap_image=True,
+                                                                                            pred_swap_enhance=True,
+                                                                                            pred_swap_guide=True,
+                                                                                            ))))
+            if fut.succeeded:
+                if (result_outputs := fut.result.result.outputs) is not None:
+                    pred_dst_guide = result_outputs.pred_dst_guide[0]
+                    pred_swap_guide = result_outputs.pred_swap_guide[0]
+                    
+                    if result_outputs.pred_swap_enhance is not None:
+                        pred_swap_image = result_outputs.pred_swap_enhance[0]
                     else:
-                        err = Exception()
+                        pred_swap_image = result_outputs.pred_swap_image[0]
                 else:
-                    err = fut.error
+                    err = Exception()
+            else:
+                err = fut.error
 
 
         if err is None:
             try:
                 img_fmt = self._mx_image_format.image_format
                 quality = self._mx_image_format.quality
-                output_path = output_root / f'{image_path.stem}{img_fmt.suffix}'
-                H, W, _ = image.shape
 
-                output_image = output_image.resize(W, H, interp=FImage.Interp.LANCZOS4)
-                output_image.save(output_path, quality=quality)
+                pred_swap_image.save(output_swap_path / f'{image_path.stem}{img_fmt.suffix}', quality=quality)
+                pred_swap_guide.save(output_swap_guide_path / f'{image_path.stem}{img_fmt.suffix}', quality=quality)
+                pred_dst_guide.save(output_rec_guide_path / f'{image_path.stem}{img_fmt.suffix}', quality=quality)
+                
             except Exception as e:
                 err = e
 

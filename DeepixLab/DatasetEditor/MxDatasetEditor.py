@@ -616,8 +616,6 @@ class MxDatasetEditor(mx.Disposable):
                 ...
             fsip.add_pair_type(pair_type)
 
-
-
             yield ax.wait(self._process_load(fsip, _process_item, caption='@(Processing)...'))
 
         yield ax.propagate(self._process_fsip(_process))
@@ -674,7 +672,7 @@ class MxDatasetEditor(mx.Disposable):
     def change_file_format(self, fmt_type : ImageFormatType, quality : int ):
         yield ax.switch_to(self._main_thread)
 
-        def _change_face_coverage(fsip : FSIP, item_id : int, item_path : Path):
+        def _change_file_format(fsip : FSIP, item_id : int, item_path : Path):
             img = FImage.from_file(item_path)
             meta = fd.FEmbedAlignedFaceInfo.from_embed(item_path)
 
@@ -687,7 +685,7 @@ class MxDatasetEditor(mx.Disposable):
 
         @ax.task
         def _process(fsip : FSIP):
-            yield ax.wait(self._process_load(fsip, _change_face_coverage, caption='@(Processing)...'))
+            yield ax.wait(self._process_load(fsip, _change_file_format, caption='@(Processing)...'))
 
         yield ax.propagate(self._process_fsip(_process))
 

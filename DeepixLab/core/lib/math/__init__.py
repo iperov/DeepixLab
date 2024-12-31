@@ -15,7 +15,7 @@ from .FVec2Array import FVec2Array, FVec2Array_like, FVec2fArray
 from .FVec3 import FVec3, FVec3_like, FVec3f, FVec3i
 from .FVec3Array import FVec3Array, FVec3Array_like, FVec3fArray
 from .FWorldProj2D import FWorldProj2D
-from .math_ import (bit_count, intersect_two_line, nearest_g_div,
+from .math_ import (intersect_two_line, nearest_g_div,
                     nearest_le_div, next_odd, polygon_area,
                     rotation_matrix_to_euler, segment_length,
                     segment_to_vector, umeyama)

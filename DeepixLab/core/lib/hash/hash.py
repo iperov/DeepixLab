@@ -7,8 +7,6 @@ import numpy as np
 
 from core.lib import cc
 
-from ..math import bit_count
-
 
 class Hash64(np.uint64):
     """64-bit hash value"""
@@ -22,8 +20,7 @@ class Hash64(np.uint64):
 
         x = []
         for i, hash in enumerate(hashes):
-
-            dissim_count = bit_count(hashes ^ hash).sum()
+            dissim_count = np.bitwise_count(hashes ^ hash).sum()
 
             x.append( (i, dissim_count) )
 

@@ -773,7 +773,7 @@ class QxDatasetEditor(qx.QVBox):
                 try:
                     meta = fd.FEmbedAlignedFaceInfo.from_embed(item_path)
                 except Exception as e:
-                    print(e)
+                    meta = None
 
                 if meta is not None:
                     aligned_face = meta.aligned_face.resize(FVec2i(TW, TH))

@@ -7,6 +7,21 @@ from ..FImage import FImage
 from .Geo import Geo
 
 
+def patch_dropout_mask( size : int,
+                        patch_count_range=[2,32],
+                        prob : float = 0.5,
+                        seed : int|None = None,
+                        ) -> FImage:
+    """"""
+    rnd_state = np.random.RandomState(seed)
+    
+    return lib_gen.patch_dropout_mask(size, 
+                                      patch_count=rnd_state.randint(patch_count_range[0], patch_count_range[1]+1),
+                                      prob=prob,
+                                      seed=rnd_state.randint(2**31))
+    
+    
+    
 def cut_edges_mask(W : int, H : int = None, cuts_range=[1,4], seed=None) -> FImage:
     """returns (H,W,1) f32 mask image"""
     if H is None:

@@ -2,12 +2,24 @@ import random
 from pathlib import Path
 from typing import Sequence
 
+import cv2
 import numpy as np
 
 from core.lib import cc, ispc
 
 from ..FImage import FImage
 
+
+def patch_dropout_mask( size : int,
+                        patch_count : int,
+                        prob : float = 0.5,
+                        seed : int|None = None,
+                        ) -> FImage:
+    """"""
+    x = np.random.RandomState(seed).binomial(1, prob, size=(patch_count,patch_count,1)).astype(np.uint8)
+    x *= 255
+    x = cv2.resize(x, (size,size), interpolation=cv2.INTER_NEAREST)
+    return FImage.from_numpy(x)
 
 def clouds(W, H=None, scales=[64, 32, 16, 8]) -> FImage:
     if H is None:

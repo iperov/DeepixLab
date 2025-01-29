@@ -15,6 +15,7 @@ class IProperty_rv(Generic[T]):
     def event(self) -> IEvent1_rv[T]: ...
 
     def listen(self, func : Callable[[T], None]) -> EventConnection: ...
+    def listen_unset(self, func : Callable[[T], None]) -> EventConnection: ...
     def reflect(self, func : Callable[[T], None]) -> EventConnection: ...
     def get(self) -> T: ...
 
@@ -40,9 +41,14 @@ class Property(Disposable, IProperty_v[T]):
         self._filter = filter
         self._defer = defer
         self._ev = Event1[T]().dispose_with(self)
+        self._ev_unset = Event1[T]().dispose_with(self)
 
     @property
     def event(self) -> IEvent1_v[T]: return self._ev
+    
+    def listen_unset(self, func : Callable[[T], None]) -> EventConnection:
+        """emits old value before set in reversed order"""
+        return self._ev_unset.listen(func)
 
     def listen(self, func : Callable[[T], None]) -> EventConnection:
         return self._ev.listen(func)
@@ -70,6 +76,7 @@ class Property(Disposable, IProperty_v[T]):
         return self
 
     def _set(self, value : T) -> Self:
+        self._ev_unset.emit(self._value, reverse=True)
         self._value = value
         self._ev.emit(value)
         return self

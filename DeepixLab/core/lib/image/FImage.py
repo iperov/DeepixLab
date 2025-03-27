@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import colorsys
 import functools
+import os
 import struct
+import time
 from enum import StrEnum
 from pathlib import Path
 from typing import Callable, Self, Sequence, Tuple, overload
@@ -128,6 +130,8 @@ class FImage:
         else:
             buf = np.frombuffer(b, dtype=np.uint8)
             img = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
+            if img is None:
+                raise Exception(f'Error loading {path}')
             dtype = img.dtype
 
             if dtype == np.uint16:
@@ -1030,10 +1034,15 @@ class FImage:
         parent.mkdir(parents=True, exist_ok=True)
         out_path = parent / (path.stem+suffix)
 
+        if out_path.exists():
+            out_path.unlink()
+        while os.path.exists(out_path):
+            time.sleep(0.016)
+                        
         if fmt_type == ImageFormatType.RGB8:
             img = np.ascontiguousarray(self.ch(3).u8().HWC())
             H,W,C = img.shape
-
+                        
             with open(out_path, "wb") as stream:
                 stream.write(struct.pack('III', H,W,C))
                 stream.write(img.data)
@@ -1056,7 +1065,7 @@ class FImage:
             ret, buf = cv2.imencode(suffix, img, imencode_args)
             if not ret:
                 raise Exception(f'Unable to encode image to {suffix}')
-
+                            
             with open(out_path, "wb") as stream:
                 stream.write( buf )
 
